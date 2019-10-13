@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29009.5
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rapidity.Http", "src\Rapidity.Http.csproj", "{F3F40C31-5D03-4777-908C-14DE240E5A0D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{761559DD-8A03-4F8B-A56B-4C81A0CB860F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{3EEDB7C8-4B77-4F41-AC2D-FE4A7CDB6E55}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rapidity.Http.Tests", "tests\Rapidity.Http.Tests\Rapidity.Http.Tests.csproj", "{ABCF566B-0167-4CE5-9025-1A04FA87F095}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wechat.Service", "samples\Wechat.Service\Wechat.Service.csproj", "{A285DF8A-3ACC-435C-A205-46E5642438E5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F3F40C31-5D03-4777-908C-14DE240E5A0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3F40C31-5D03-4777-908C-14DE240E5A0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3F40C31-5D03-4777-908C-14DE240E5A0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3F40C31-5D03-4777-908C-14DE240E5A0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABCF566B-0167-4CE5-9025-1A04FA87F095}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABCF566B-0167-4CE5-9025-1A04FA87F095}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABCF566B-0167-4CE5-9025-1A04FA87F095}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABCF566B-0167-4CE5-9025-1A04FA87F095}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A285DF8A-3ACC-435C-A205-46E5642438E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A285DF8A-3ACC-435C-A205-46E5642438E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A285DF8A-3ACC-435C-A205-46E5642438E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A285DF8A-3ACC-435C-A205-46E5642438E5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{ABCF566B-0167-4CE5-9025-1A04FA87F095} = {3EEDB7C8-4B77-4F41-AC2D-FE4A7CDB6E55}
+		{A285DF8A-3ACC-435C-A205-46E5642438E5} = {761559DD-8A03-4F8B-A56B-4C81A0CB860F}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {59257A7C-E3D3-4316-BD95-5349281036AE}
+	EndGlobalSection
+EndGlobal
