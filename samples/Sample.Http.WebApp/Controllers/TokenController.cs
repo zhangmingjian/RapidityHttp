@@ -37,7 +37,8 @@ namespace Sample.Http.WebApp.Controllers
         {
             _cache.TryGetValue("token", out AccessToken token);
             //var token = "26_v5Otju59BnoGK3Xt2t96bdhYyzf2sSmMaZHy0cWcQHnq4r8bbtovSmdTYcLBB6eqzavBH9MuLUp4v5EXb9uEecbikimIgfG39DStw5xMs_hNCH9PpmFiCpi0LpaQbaSrvZfEmYnnUaCj_NGQAKZeAEAUET";
-            return await _tokenService.GetIpListAsync(token?.access_token);
+            var response = await _tokenService.GetIpListAsync(token?.access_token);
+            return response.Data;
         }
 
         // POST api/values
@@ -52,8 +53,9 @@ namespace Sample.Http.WebApp.Controllers
                 url = "https://developers.weixin.qq.com/doc",
                 data = new MessageTemplate.Data()
             };
-            await _tokenService.SendTemplateMsg(token.access_token, input);
-            return Json("ok");
+             _tokenService.SendTemplateMsg(token.access_token, input);
+            await Task.CompletedTask;
+            return Content("OK");
         }
 
         // PUT api/values/5

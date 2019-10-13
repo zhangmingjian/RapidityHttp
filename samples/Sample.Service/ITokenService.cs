@@ -13,10 +13,10 @@ namespace Sample.Service
         Task<AccessToken> GetToken([Query] string appid, [Query]string secret, [Query(Name = "grant_type")]string grantType = "client_credential");
 
         [Get("/cgi-bin/getcallbackip?access_token={token}")]
-        Task<IpList> GetIpListAsync([Query] string token);
+        Task<ResponseWrapper<IpList>> GetIpListAsync([Query] string token);
 
         [Post("/cgi-bin/message/template/send?access_token={token}")]
-        Task SendTemplateMsg(string token, [Body(CanNull = false)] MessageTemplate template);
+        void SendTemplateMsg(string token, [Body(CanNull = false)] MessageTemplate template);
     }
 
 

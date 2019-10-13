@@ -24,18 +24,16 @@ namespace Rapidity.Http.DynamicProxies
 
             var isAsync = false;
             Type returnType = targetMethod.ReturnType;
-            if (targetMethod.ReturnType != typeof(void))
+            if (targetMethod.ReturnType == typeof(Task) || targetMethod.ReturnType.Name == "Task`1")
             {
-                if (targetMethod.ReturnType == typeof(Task) || targetMethod.ReturnType.Name == "Task`1")
-                {
-                    isAsync = true;
-                    if (targetMethod.ReturnType.IsGenericType)
-                        returnType = targetMethod.ReturnType.GetGenericArguments()[0];
-                }
+                isAsync = true;
+                if (targetMethod.ReturnType.IsGenericType)
+                    returnType = targetMethod.ReturnType.GetGenericArguments()[0];
             }
+
             object result = null;
 
-            var sendMethod = BuildInvokeMethod(returnType);
+            var sendMethod = GetInvokeMethod(returnType);
             if (sendMethod.IsGenericMethod)
             {
                 var genericType = returnType;
@@ -60,7 +58,7 @@ namespace Rapidity.Http.DynamicProxies
             return task.GetType().GetProperty("Result")?.GetValue(task);
         }
 
-        private MethodInfo BuildInvokeMethod(Type returnType)
+        private MethodInfo GetInvokeMethod(Type returnType)
         {
 
             if (returnType == typeof(ResponseWrapper))
