@@ -73,10 +73,7 @@ namespace Rapidity.Http
                 {
                     if (!queryAttr.CanNull && parameterValue == null)
                         throw new ArgumentNullException(parameter.Name);
-                    if (parameter.ParameterType.IsValueType
-                        || parameter.ParameterType == typeof(string)
-                        || parameter.ParameterType == typeof(Guid)
-                        || parameter.ParameterType == typeof(DateTime))
+                    if (parameter.ParameterType.IsSimpleType())
                     {
                         var name = string.IsNullOrEmpty(queryAttr.Name) ? parameter.Name : queryAttr.Name;
                         description.UriQuery.Add(name, parameterValue?.ToString());
@@ -90,10 +87,7 @@ namespace Rapidity.Http
                 {
                     if (!headerAttr.CanNull && parameterValue == null)
                         throw new ArgumentNullException(parameter.Name);
-                    if (parameter.ParameterType.IsValueType
-                        || parameter.ParameterType == typeof(string)
-                        || parameter.ParameterType == typeof(Guid)
-                        || parameter.ParameterType == typeof(DateTime))
+                    if (parameter.ParameterType.IsSimpleType())
                     {
                         var name = string.IsNullOrEmpty(headerAttr.Name) ? parameter.Name : headerAttr.Name;
                         description.Headers.Add(name, parameterValue?.ToString());
