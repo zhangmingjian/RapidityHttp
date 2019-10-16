@@ -5,30 +5,24 @@ using System.CodeDom.Compiler;
 namespace Rapidity.Http.DynamicProxies
 {
     /// <summary>
-    /// 
+    /// https://stackoverflow.com/questions/37526165/compiling-and-running-code-at-runtime-in-net-core-1-0
     /// </summary>
     public class ProxyGenerator
     {
         public static Type Generate(Type type)
         {
-            //var options = new Dictionary<string, string> {
-            //    { "CompilerVersion", "v4.5" }
-            //};
-            //CSharpCodeProvider provider = new CSharpCodeProvider();
-            var provider = CodeDomProvider.CreateProvider("CSharp");
+            CSharpCodeProvider provider = new CSharpCodeProvider();
             var referencedDll = new string[]
             {
-                "mscorlib.dll",
-                "System.dll",
-                "System.Core.dll",
+                "System.dll"
             };
             var parameters = new CompilerParameters(referencedDll)
             {
-                IncludeDebugInformation = true,
+                IncludeDebugInformation = false,
                 GenerateInMemory = true,
                 TreatWarningsAsErrors = true
             };
-            var source = new[] { "class Test { static void Foo() {}}" };
+            var source =  "class Test { static void Foo() {}}";
             var result = provider.CompileAssemblyFromSource(parameters, source);
             if (result.Errors.HasErrors)
             {
