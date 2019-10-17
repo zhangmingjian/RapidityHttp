@@ -6,6 +6,7 @@ namespace Rapidity.Http.DynamicProxies
 {
     /// <summary>
     /// https://stackoverflow.com/questions/37526165/compiling-and-running-code-at-runtime-in-net-core-1-0
+    /// https://benohead.com/three-options-to-dynamically-execute-csharp-code/
     /// </summary>
     public class ProxyGenerator
     {
@@ -22,7 +23,7 @@ namespace Rapidity.Http.DynamicProxies
                 GenerateInMemory = true,
                 TreatWarningsAsErrors = true
             };
-            var source =  "class Test { static void Foo() {}}";
+            var source = "namespace Sample.test{ class Test { static void Foo() {}} }";
             var result = provider.CompileAssemblyFromSource(parameters, source);
             if (result.Errors.HasErrors)
             {
