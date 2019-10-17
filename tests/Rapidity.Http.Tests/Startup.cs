@@ -8,7 +8,7 @@ namespace Rapidity.Http.Tests
     {
         public static IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.UseRapidHttp().ConfigRecordStore<TextInvokeRecordStore>().AddService("wechat", config =>
+            services.UseRapidityHttp().ConfigRecordStore<TextInvokeRecordStore>().AddService("wechat", config =>
             {
                 config.BaseAddress = "https://api.weixin.qq.com/";
             });

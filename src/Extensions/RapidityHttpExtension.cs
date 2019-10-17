@@ -15,7 +15,7 @@ namespace Rapidity.Http.Extensions
     /// </summary>
     public static class RapidityHttpExtension
     {
-        public static IServiceCollection UseRapidHttp(this IServiceCollection services)
+        public static IServiceCollection UseRapidityHttp(this IServiceCollection services)
         {
             services.TryAddTransient<IJsonContentSerializer, NewtonsoftJsonSerializer>();
             services.TryAddTransient<IXmlContentSerializer, XmlContentSerializer>();
@@ -72,10 +72,10 @@ namespace Rapidity.Http.Extensions
                 if (!string.IsNullOrEmpty(config.BaseAddress))
                     client.BaseAddress = new Uri(config.BaseAddress, UriKind.Absolute);
                 //设置默认headers
-                if (config.Option.DefaultHeaders.Count > 0)
+                if (config.Item.DefaultHeaders.Count > 0)
                 {
-                    foreach (var key in config.Option.DefaultHeaders.AllKeys)
-                        client.DefaultRequestHeaders.Add(key, config.Option.DefaultHeaders.Get(key));
+                    foreach (var key in config.Item.DefaultHeaders.AllKeys)
+                        client.DefaultRequestHeaders.Add(key, config.Item.DefaultHeaders.Get(key));
                 }
 
                 //设置请求超时时间(默认30秒)

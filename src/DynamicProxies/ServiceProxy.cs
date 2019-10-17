@@ -13,12 +13,12 @@ namespace Rapidity.Http.DynamicProxies
     /// </summary>
     public class ServiceProxy
     {
-        public IServiceProvider ServiceProvider { get; set; }
+        private IServiceProvider _provider { get; set; }
 
         protected virtual object Invoke(MethodInfo targetMethod, object[] args)
         {
-            var builder = ServiceProvider.GetService<IRequestDescriptionBuilder>();
-            var wrapper = ServiceProvider.GetService<IHttpClientWrapper>();
+            var builder = _provider.GetService<IRequestDescriptionBuilder>();
+            var wrapper = _provider.GetService<IHttpClientWrapper>();
 
             var description = builder.Build(targetMethod, args);
 
@@ -94,7 +94,7 @@ namespace Rapidity.Http.DynamicProxies
         public static ServiceProxy Create(Type type, IServiceProvider provider)
         {
             var proxy = (ServiceProxy)ServiceProxyGenerator.CreateProxyInstance(typeof(ServiceProxy), type);
-            proxy.ServiceProvider = provider;
+            proxy._provider = provider;
             return proxy;
         }
     }

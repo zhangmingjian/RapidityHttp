@@ -17,15 +17,13 @@ namespace Sample.Http.ConsoleApp
 
             var dotnetCoreDirectory = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
 
-            var compilation = CSharpCompilation.Create("a")
-    .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-            .AddReferences(MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location))
+            var compilation = CSharpCompilation.Create("a").WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
+                        .AddReferences(MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location))
                        .AddReferences(MetadataReference.CreateFromFile(typeof(System.Console).GetTypeInfo().Assembly.Location))
                        //.AddReferences(MetadataReference.CreateFromFile(Path.Combine(dotnetCoreDirectory, "mscorlib.dll")))
                        //.AddReferences(MetadataReference.CreateFromFile(Path.Combine(dotnetCoreDirectory, "netstandard.dll")))
                        .AddReferences(MetadataReference.CreateFromFile(Path.Combine(dotnetCoreDirectory, "System.Runtime.dll")))
-
-            .AddSyntaxTrees(CSharpSyntaxTree.ParseText(
+                        .AddSyntaxTrees(CSharpSyntaxTree.ParseText(
         @"
 using System;
 
@@ -52,7 +50,7 @@ public static class C
                     target = assembly.GetType("C", true, true);
                 }
             }
-            var text = target.GetMethod("Test").Invoke(null, new object[] { "你好而法国微软微软微软为" });
+            var text = target.GetMethod("Test").Invoke(null, new object[] { "felkjlfkewjiawoejf" });
 
             Console.ReadKey();
         }

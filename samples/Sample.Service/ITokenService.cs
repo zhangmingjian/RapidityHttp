@@ -16,6 +16,8 @@ namespace Sample.Service
         Task<ResponseWrapper<IpList>> GetIpListAsync([Query] string token);
 
         [Post("/cgi-bin/message/template/send?access_token={token}")]
+        [Header("data:{data}")] 
+        [Header("header:12121212")]
         void SendTemplateMsg(string token, [Body(CanNull = false)] MessageTemplate template);
     }
 

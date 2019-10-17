@@ -21,12 +21,12 @@ namespace Sample.Http.WebApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.UseRapidHttp().ConfigRecordStore<TextInvokeRecordStore>().AddService("wechat", config =>
+            services.UseRapidityHttp().ConfigRecordStore<TextInvokeRecordStore>().AddService("wechat", config =>
             {
                 config.BaseAddress = "https://api.weixin.qq.com/";
                 config.Timeout = 60;
-                config.Option.ContentType = "application/json";
-                config.Option.DefaultHeaders.Add("customHeader", "fromtest");
+                config.Item.ContentType = "application/json";
+                config.Item.DefaultHeaders.Add("customHeader", "fromtest");
             }).For<ITokenService>();
             services.BuildProxy();
 

@@ -20,8 +20,8 @@ namespace Rapidity.Http.Configurations
         /// </summary>
         public string BaseAddress
         {
-            get => this.Option.Uri;
-            set => this.Option.Uri = value;
+            get => this.Item.Uri;
+            set => this.Item.Uri = value;
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Rapidity.Http.Configurations
         /// <summary>
         /// 请求相关参数配置，通用部分，module内的配置会覆盖root中的内容
         /// </summary>
-        public HttpConfigureItem Option { get; set; } = new HttpConfigureItem();
+        public HttpConfigureItem Item { get; set; } = new HttpConfigureItem();
 
         /// <summary>
         /// 服务下的模块配置
@@ -51,14 +51,10 @@ namespace Rapidity.Http.Configurations
         /// <returns></returns>
         public HttpConfigureItem GetConfigureItem(string moduleName)
         {
-            if (string.IsNullOrEmpty(moduleName))
-                return this.Option;
-            if (ModuleItems.ContainsKey(moduleName))
-            {
-                var moduleOption = ModuleItems[moduleName];
-                return moduleOption.Union(this.Option, true);
-            }
-            return this.Option;
+            if (string.IsNullOrEmpty(moduleName) || !ModuleItems.ContainsKey(moduleName))
+                return this.Item;
+            var moduleOption = ModuleItems[moduleName];
+            return moduleOption.Union(this.Item, true);
         }
     }
 }

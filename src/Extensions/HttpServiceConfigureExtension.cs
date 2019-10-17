@@ -23,6 +23,20 @@ namespace Rapidity.Http.Extensions
         }
 
         /// <summary>
+        /// 批量注册 用于整个项目对接一个服务时
+        /// </summary>
+        /// <param name="serviceConfigure"></param>
+        /// <param name="assembly"></param>
+        /// <returns></returns>
+        public static HttpServiceConfigure ForTypes(this HttpServiceConfigure serviceConfigure, Assembly assembly)
+        {
+            if (assembly == null) throw new ArgumentNullException(nameof(assembly));
+            var types = assembly.GetTypes()
+                .Where(type =>typeof(IHttpService).IsAssignableFrom(type) || type.GetCustomAttribute<HttpServiceAttribute>() != null);
+            return serviceConfigure.ForTypes(types.ToArray());
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <typeparam name="TService"></typeparam>

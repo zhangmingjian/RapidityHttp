@@ -5,12 +5,12 @@ using System.Net.Http;
 namespace Rapidity.Http.Configurations
 {
     /// <summary>
-    /// 当前请求所须的配置参数
+    /// 当前请求配置参数
     /// </summary>
     public class HttpConfigureItem
     {
         /// <summary>
-        /// 请求路径
+        /// 请求url
         /// </summary>
         public string Uri { get; set; }
         /// <summary>
