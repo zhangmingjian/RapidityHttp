@@ -17,7 +17,7 @@ RapidityHttp是对HttpClient的包装，内含重试，熔断降级，请求缓�
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
   
-  服务定义时只需定义接口实现IHttpService，或者使用HttpServiceAttribute标签,通过配置标签配合启动配置组件自动生成接口代理实现类
+  服务定义时只需定义接口实现IHttpService，或者使用HttpServiceAttribute标签, 组件自动生成接口代理实现类
   
     1.继承自IHttpService接口
     public interface ITokenService : IHttpService
