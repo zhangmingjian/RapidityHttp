@@ -133,6 +133,8 @@ namespace Rapidity.Http.Extensions
                     if (typeof(IHttpService).IsAssignableFrom(type)
                          || (type.GetCustomAttribute<HttpServiceAttribute>()?.GenerateProxy ?? false))
                     {
+                        //var proxyType = ProxyGenerator.Generate(type);
+                        //services.AddTransient(type, proxyType);
                         services.AddSingleton(type, provider => ServiceProxy.Create(type, provider));
                     }
                 }

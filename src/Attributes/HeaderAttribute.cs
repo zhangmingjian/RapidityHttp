@@ -5,7 +5,9 @@ namespace Rapidity.Http.Attributes
     /// <summary>
     /// RequestHeader设置可用于方法，参数，类属性
     /// </summary>
-    [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.Method, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Interface | AttributeTargets.Class
+                    | AttributeTargets.Parameter | AttributeTargets.Property
+                    | AttributeTargets.Method, AllowMultiple = true)]
     public class HeaderAttribute : NamedAttribute, ICanNullable
     {
         public string Value { get; protected set; }

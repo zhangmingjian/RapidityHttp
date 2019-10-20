@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 
 namespace Rapidity.Http.Extensions
@@ -18,9 +19,15 @@ namespace Rapidity.Http.Extensions
             {
                 var frame = stack.GetFrame(deep);
                 method = (MethodInfo)frame.GetMethod();
-                if (method.ReflectedType == entryType
-                    || entryType.IsInterface && entryType.IsAssignableFrom(method.ReflectedType))
+                if (method.ReflectedType == entryType) break;
+                if (entryType.IsInterface && entryType.IsAssignableFrom(method.ReflectedType))
+                {
+                    //转换成接口方法
+                    var parametTypes = method.GetParameters().Select(x => x.ParameterType).ToArray();
+                    var genericCount = method.GetGenericArguments().Length;
+                    method = entryType.GetMethodInfo(method.Name, null, method.IsGenericMethod, genericCount, parametTypes);
                     break;
+                }
                 method = null;
             }
             if (method == null)

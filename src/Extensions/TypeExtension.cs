@@ -16,13 +16,16 @@ namespace Rapidity.Http.Extensions
         /// <param name="name"></param>
         /// <param name="flags"></param>
         /// <param name="isGeneric"></param>
+        /// <param name="genericParameterCount"></param>
         /// <param name="parameterTypes"></param>
         /// <returns></returns>
-        public static MethodInfo GetMethodInfo(this Type type, string name, BindingFlags flags, bool isGeneric, params Type[] parameterTypes)
+        public static MethodInfo GetMethodInfo(this Type type, string name, BindingFlags? flags, bool isGeneric, int genericParameterCount = 0, params Type[] parameterTypes)
         {
-            var method = type.GetMethods(flags).FirstOrDefault(m =>
+            var methods = flags == null ? type.GetMethods() : type.GetMethods(flags.Value);
+            var method = methods.FirstOrDefault(m =>
             {
-                if (m.Name != name || m.IsGenericMethod != isGeneric)
+                if (m.Name != name || m.IsGenericMethod != isGeneric
+                    || m.IsGenericMethod && m.GetGenericArguments().Length != genericParameterCount)
                     return false;
                 var parameters = m.GetParameters();
                 if (parameters.Length != parameterTypes.Length)

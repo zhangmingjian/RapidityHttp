@@ -53,14 +53,19 @@ namespace Rapidity.Http.Extensions
             var httpAttr = type.GetCustomAttribute<HttpServiceAttribute>(false);
             var cacheAttr = type.GetCustomAttribute<CacheAttribute>(false);
             var retryAttr = type.GetCustomAttribute<RetryAttribute>(false);
+          
             var namedOption = new NamedHttpConfigureItem
             {
                 Option = new HttpConfigureItem
                 {
                     CacheOption = cacheAttr?.GetCacheOption(),
-                    RetryOption = retryAttr?.GetRetryOption()
+                    RetryOption = retryAttr?.GetRetryOption(),
                 }
             };
+            var headers = type.GetCustomAttributes<HeaderAttribute>(false);
+            foreach (var header in headers)
+                namedOption.Option.DefaultHeaders.Add(header.Name, header.Value);
+
             if (httpAttr != null)
             {
                 namedOption.Service = httpAttr.Service;

@@ -19,6 +19,7 @@ namespace Rapidity.Http
             sb.Append($"Url:{GetUriPath(result.Request.RequestUri.ToString())}, ");
             sb.Append($"Duration:{result.Duration}ms, ");
             sb.Append($"RetryCount:{result.RetryCount}, ");
+            sb.Append($"StatusCode:{(result.Response != null ? ((int)result.Response.StatusCode).ToString() : string.Empty)}, ");
 
             var content = result.RawResponse != null && result.RawResponse.Length > 2000
                 ? result.RawResponse?.Substring(0, 2000) + "..."

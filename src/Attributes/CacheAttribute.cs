@@ -2,7 +2,7 @@
 
 namespace Rapidity.Http.Attributes
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Method)]
     public class CacheAttribute : Attribute
     {
         /// <summary>
