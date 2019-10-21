@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -93,16 +94,15 @@ namespace Rapidity.Http.DynamicProxies
                 IsAsync = method.ReturnType == typeof(Task) || method.ReturnType.Name == "Task`1"
             };
             template.ReturnType = new TypeTemplate(method.ReturnType);
+            //方法标签
             foreach (var attr in CustomAttributeData.GetCustomAttributes(method))
                 template.AttributeList.Add(attr.ToString());
+            //方法参数
             foreach (var parameter in method.GetParameters())
             {
-                template.Parameters.Add(new ParameterTemplate
-                {
-                    Name = parameter.Name,
-                    ParameterType = new TypeTemplate(parameter.ParameterType)
-                });
-            }
+                template.Parameters.Add(new ParameterTemplate(parameter));
+                var value = new ParameterTemplate(parameter).ToString();
+            } 
             return template;
         }
     }

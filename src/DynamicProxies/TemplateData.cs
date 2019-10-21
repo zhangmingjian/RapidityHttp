@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace Rapidity.Http.DynamicProxies
 {
     /// <summary>
     /// 模板数据
+    /// todo: 1.泛型约束生成 2.泛型方法生成
     /// </summary>
     public class TemplateData
     {
@@ -131,13 +134,73 @@ namespace Rapidity.Http.DynamicProxies
 
     public class ParameterTemplate
     {
-        public string Name { get; set; }
+        public ParameterInfo ParameterInfo { get; }
 
-        public TypeTemplate ParameterType { get; set; }
+        public ParameterTemplate(ParameterInfo info)
+        {
+            if (info.Attributes.HasFlag(ParameterAttributes.Out)) throw new NotSupportedException("不支持定义out参数");
+            if (info.Attributes.HasFlag(ParameterAttributes.In)) throw new NotSupportedException("不支持定义in参数");
+            ParameterInfo = info;
+        }
+
+        /// <summary>
+        /// 参数名称
+        /// </summary>
+        public string Name => ParameterInfo.Name;
+
+        /// <summary>
+        /// 参数类型
+        /// </summary>
+        public TypeTemplate ParameterType => new TypeTemplate(ParameterInfo.ParameterType);
+
+        /// <summary>
+        /// 标签列表
+        /// </summary>
+        public ICollection<string> AttributeList
+        {
+            get
+            {
+                return CustomAttributeData.GetCustomAttributes(ParameterInfo)
+                        .Where(x => x.AttributeType != typeof(OptionalAttribute))
+                        .Select(x => x.ToString()).ToList();
+            }
+        }
+
+        private string DefaultValueToString()
+        {
+            string value = string.Empty;
+            if (ParameterInfo.IsOptional)
+            {
+                try
+                {
+                    if (ParameterInfo.DefaultValue != null)
+                    {
+                        if (ParameterInfo.ParameterType == typeof(string))
+                            value = $"\"{ParameterInfo.DefaultValue}\"";
+                        else if (ParameterInfo.ParameterType == typeof(char))
+                            value = $"'{ParameterInfo.DefaultValue}'";
+                        else
+                            value = ParameterInfo.DefaultValue.ToString();
+                    }
+                    else value = $"default({ParameterType})";
+                }
+                catch
+                {
+                    value = $"default({ParameterType})";
+                }
+            }
+            return value;
+        }
 
         public override string ToString()
         {
-            return $"{ParameterType} {Name}";
+            var value = DefaultValueToString();
+            value = string.IsNullOrEmpty(value) ? value : " = " + value;
+            var attrs = string.Join("", AttributeList);
+            var paramsFlag = ParameterInfo.CustomAttributes
+                                 .FirstOrDefault(x => x.AttributeType == typeof(ParamArrayAttribute)) != null 
+                                ? "params " : string.Empty;
+            return $"{attrs}{paramsFlag}{ParameterType} {Name}{value}";
         }
     }
 }
