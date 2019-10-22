@@ -74,35 +74,10 @@ namespace Rapidity.Http.DynamicProxies
             {
                 if (method.Attributes.HasFlag(MethodAttributes.SpecialName))
                     continue;
-                classTemplate.MethodList.Add(BuildMethodTemplate(method));
+                classTemplate.MethodList.Add(new MethodTemplate(method));
             }
 
             template.ClassList.Add(classTemplate);
-            return template;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="method"></param>
-        /// <returns></returns>
-        private static MethodTemplate BuildMethodTemplate(MethodInfo method)
-        {
-            var template = new MethodTemplate
-            {
-                Name = method.Name,
-                IsAsync = method.ReturnType == typeof(Task) || method.ReturnType.Name == "Task`1"
-            };
-            template.ReturnType = new TypeTemplate(method.ReturnType);
-            //方法标签
-            foreach (var attr in CustomAttributeData.GetCustomAttributes(method))
-                template.AttributeList.Add(attr.ToString());
-            //方法参数
-            foreach (var parameter in method.GetParameters())
-            {
-                template.Parameters.Add(new ParameterTemplate(parameter));
-                var value = new ParameterTemplate(parameter).ToString();
-            } 
             return template;
         }
     }
