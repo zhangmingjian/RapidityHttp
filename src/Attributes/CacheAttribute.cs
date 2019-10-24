@@ -12,7 +12,7 @@ namespace Rapidity.Http.Attributes
         /// <summary>
         /// 过期时间
         /// </summary>
-        public TimeSpan? ExpireIn { get; set; }
+        public TimeSpan? ExpireIn { get; }
 
         public CacheAttribute(bool enabled)
         {

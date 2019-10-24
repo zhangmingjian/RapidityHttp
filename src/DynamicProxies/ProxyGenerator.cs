@@ -52,7 +52,8 @@ namespace Rapidity.Http.DynamicProxies
 
         public static TemplateData BuildTemplate(Type type)
         {
-            var template = new TemplateData() { };
+            var template = new TemplateData();
+            template.UsingList.Add(typeof(int).Namespace);
             template.UsingList.Add(typeof(Task).Namespace);
             template.UsingList.Add(typeof(IHttpService).Namespace);
             template.UsingList.Add(type.Namespace);
@@ -70,6 +71,40 @@ namespace Rapidity.Http.DynamicProxies
 
             classTemplate.ImplementInterfaces.Add(new TypeTemplate(type));
 
+            if (type.IsGenericType)
+            {
+                foreach (var argumentType in type.GetGenericArguments())
+                {
+                    var argument = new GenericArgumentTemplate()
+                    {
+                        Name = argumentType.Name
+                    };
+                    Type[] constraints = argumentType.GetGenericParameterConstraints();
+                    foreach (var constraintType in constraints)
+                        argument.Constraints.Add(new TypeTemplate(constraintType).ToString());
+
+                    if (argumentType.GenericParameterAttributes == GenericParameterAttributes.None) continue;
+                    //协变
+                    if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.Covariant))
+                        argument.IsOut = true;
+                    //逆变
+                    if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.Contravariant))
+                        argument.IsIn = true;
+                    //class约束
+                    if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint))
+                        argument.Constraints.Add("class");
+                    //值类型约束
+                    if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.NotNullableValueTypeConstraint))
+                        argument.Constraints.Add("struct");
+                    //无参构造函数
+                    if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint))
+                        argument.Constraints.Add("new()");
+
+                    classTemplate.GenericArguments.Add(argument);
+                }
+            }
+
+            //方法信息
             foreach (var method in type.GetRuntimeMethods())
             {
                 if (method.Attributes.HasFlag(MethodAttributes.SpecialName))

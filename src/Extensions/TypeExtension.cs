@@ -47,27 +47,12 @@ namespace Rapidity.Http.Extensions
         /// <returns></returns>
         public static bool IsSimpleType(this Type type)
         {
-            var valueTypes = new[]
+            var code = Type.GetTypeCode(type);
+            switch (code)
             {
-                typeof(string),
-                typeof(char),typeof(char?),
-                typeof(int), typeof(int?),
-                typeof(byte),typeof(byte?),
-                typeof(sbyte),typeof(sbyte?),
-                typeof(short),typeof(short?),
-                typeof(ushort),typeof(ushort?),
-                typeof(uint), typeof(uint?),
-                typeof(long),typeof(long?),
-                typeof(ulong),typeof(ulong?),
-                typeof(float),typeof(float?),
-                typeof(double),typeof(double?),
-                typeof(decimal), typeof(decimal?),
-                typeof(Guid),typeof(Guid?),
-                typeof(DateTime),typeof(DateTime?),
-                typeof(bool),typeof(bool?)
-            };
-
-            return valueTypes.Contains(type);
+                case TypeCode.Object: return false;
+                default: return true;
+            }
         }
     }
 }

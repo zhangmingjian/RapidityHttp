@@ -49,18 +49,11 @@ namespace Rapidity.Http.DynamicProxies
         /// 实现的接口
         /// </summary>
         public ICollection<TypeTemplate> ImplementInterfaces { get; set; } = new Collection<TypeTemplate>();
-        /// <summary>
-        /// 是否为泛型接口
-        /// </summary>
-        public bool IsGenericInterface => (GenericArguments?.Count ?? 0) > 0;
+
         /// <summary>
         /// 泛型参数
         /// </summary>
-        public ICollection<string> GenericArguments { get; set; }
-        /// <summary>
-        /// 泛型约束
-        /// </summary>
-        public string GenericConstraint { get; set; }
+        public ICollection<GenericArgumentTemplate> GenericArguments { get; } = new Collection<GenericArgumentTemplate>();
 
         /// <summary>
         /// 方法列表
@@ -86,23 +79,35 @@ namespace Rapidity.Http.DynamicProxies
 
             if (method.IsGenericMethod)
             {
-                var genericMethod = method.GetGenericMethodDefinition();
-                foreach (var argumentType in genericMethod.GetGenericArguments())
+                foreach (var argumentType in method.GetGenericArguments())
                 {
-                    GenericArguments.Add(argumentType.Name);
+                    var argument = new GenericArgumentTemplate()
+                    {
+                        Name = argumentType.Name
+                    };
                     Type[] constraints = argumentType.GetGenericParameterConstraints();
+                    foreach (var type in constraints)
+                        argument.Constraints.Add(new TypeTemplate(type).ToString());
+
                     if (argumentType.GenericParameterAttributes == GenericParameterAttributes.None) continue;
-                    this.GenericConstraints[argumentType.Name] = new Collection<string>();
-                    if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes
-                        .ReferenceTypeConstraint))
-                        this.GenericConstraints[argumentType.Name].Add("class");
+                    ////协变
+                    //if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.Covariant))
+                    //    argument.IsOut = true;
+                    ////逆变
+                    //if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.Contravariant))
+                    //    argument.IsIn = true;
+                    //class约束
+                    if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint))
+                        argument.Constraints.Add("class");
+                    //值类型约束
                     if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.NotNullableValueTypeConstraint))
-                        this.GenericConstraints[argumentType.Name].Add("struct");
-
+                        argument.Constraints.Add("struct");
+                    //无参构造函数
                     if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint))
-                        this.GenericConstraints[argumentType.Name].Add("new()");
-                }
+                        argument.Constraints.Add("new()");
 
+                    GenericArguments.Add(argument);
+                }
             }
         }
 
@@ -134,12 +139,17 @@ namespace Rapidity.Http.DynamicProxies
         /// <summary>
         /// 泛型参数
         /// </summary>
-        public ICollection<string> GenericArguments { get; } = new Collection<string>();
+        public ICollection<GenericArgumentTemplate> GenericArguments { get; } = new Collection<GenericArgumentTemplate>();
 
         /// <summary>
-        /// 泛型约束
+        /// 泛型参数
         /// </summary>
-        public IDictionary<string, ICollection<string>> GenericConstraints { get; } = new Dictionary<string, ICollection<string>>();
+        //public ICollection<string> GenericArguments { get; } = new Collection<string>();
+
+        ///// <summary>
+        ///// 泛型约束
+        ///// </summary>
+        //public IDictionary<string, ICollection<string>> GenericConstraints { get; } = new Dictionary<string, ICollection<string>>();
 
     }
 
@@ -159,10 +169,11 @@ namespace Rapidity.Http.DynamicProxies
         {
             foreach (var genericType in type.GenericTypeArguments)
                 GenericArguments.Add(new TypeTemplate(genericType));
-
+            //type.Namespace 需要考虑是否加上namespace
+            var fullName = type.FullName ?? type.Name; //当为泛型类型时，fullname为null
             Name = GenericArguments.Count <= 0
-                ? type.FullName ?? type.Name  //当为泛型类型时，fullname为null
-                : type.FullName.Substring(0, type.FullName.IndexOf('`'));
+                ? fullName
+                : fullName.Substring(0, fullName.IndexOf('`'));
         }
 
         public override string ToString()
@@ -248,5 +259,28 @@ namespace Rapidity.Http.DynamicProxies
                                 ? "params " : string.Empty;
             return $"{attrs}{paramsFlag}{ParameterType} {Name}{value}";
         }
+    }
+
+    /// <summary>
+    /// 泛型参数信息
+    /// </summary>
+    public class GenericArgumentTemplate
+    {
+        /// <summary>
+        /// 泛型参数名
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
+        /// 是否逆变
+        /// </summary>
+        public bool IsIn { get; set; }
+        /// <summary>
+        /// 是否协变
+        /// </summary>
+        public bool IsOut { get; set; }
+        /// <summary>
+        /// 泛型约束
+        /// </summary>
+        public ICollection<string> Constraints { get; set; } = new Collection<string>();
     }
 }
