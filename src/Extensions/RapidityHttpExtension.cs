@@ -56,7 +56,6 @@ namespace Rapidity.Http.Extensions
             return configuration;
         }
 
-
         /// <summary>
         /// 添加服务配置，并添加对应的httpClient
         /// </summary>
@@ -79,7 +78,6 @@ namespace Rapidity.Http.Extensions
                     foreach (var key in config.Item.DefaultHeaders.AllKeys)
                         client.DefaultRequestHeaders.Add(key, config.Item.DefaultHeaders.Get(key));
                 }
-
                 //设置请求超时时间(默认30秒)
                 client.Timeout = TimeSpan.FromSeconds(config.Timeout > 0 ? config.Timeout : 30);
             });
@@ -127,31 +125,24 @@ namespace Rapidity.Http.Extensions
         public static IServiceCollection BuildProxy(this IServiceCollection services)
         {
             var configuration = services.ServiceConfigure();
-            var configedTypes = new Dictionary<HttpServiceConfigure, ICollection<Type>>();
             var allTypes = new Collection<Type>();
             foreach (var config in configuration)
             {
-                configedTypes[config] = new Collection<Type>();
                 foreach (var type in config.ForTypes)
                 {
                     if (!type.IsInterface) continue;
                     if (typeof(IHttpService).IsAssignableFrom(type)
                          || (type.GetCustomAttribute<HttpServiceAttribute>()?.GenerateProxy ?? false))
                     {
-                        configedTypes[config].Add(type);
                         allTypes.Add(type);
                     }
                 }
             }
             var assembly = ProxyGenerator.Generate(allTypes.ToArray());
-            foreach(var config in configedTypes.Keys)
+            foreach (var type in allTypes)
             {
-                foreach(var type in configedTypes[config])
-                {
-                    var proxyType = assembly.GetTypes().First(x => type.IsAssignableFrom(x));
-                    services.AddTransient(type, proxyType);
-                    config.ForTypes(proxyType);
-                }
+                var proxyType = assembly.ExportedTypes.First(x => type.IsAssignableFrom(x));
+                services.AddTransient(type, proxyType);
             }
             return services;
         }

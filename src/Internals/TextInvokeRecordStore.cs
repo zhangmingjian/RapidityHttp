@@ -30,10 +30,10 @@ namespace Rapidity.Http
                 sb.Append($"Exception:{result.Exception.Message}:{result.Exception}");
             sb.AppendLine();
 
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", DateTime.Today.ToString("yyyyMMdd"));
-            if (!Directory.Exists(filePath))
-                Directory.CreateDirectory(filePath);
-            var fileName = Path.Combine(filePath, description.ServiceName + ".log");
+            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
+            if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
+
+            var fileName = Path.Combine(filePath, $"{description.ServiceName}_{DateTime.Today.ToString("yyyyMMdd")}.log");
             var fileInfo = new FileInfo(fileName);
 
             lock (_lock)

@@ -15,6 +15,8 @@ namespace Rapidity.Http.Configurations
 
         HttpServiceConfigure Get(Type type);
 
+        HttpServiceConfigure Get(Type type, bool interfaceSubType);
+
         HttpServiceConfigure AddConfigure(HttpServiceConfigure config);
 
     }

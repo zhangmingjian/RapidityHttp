@@ -15,13 +15,13 @@ namespace Rapidity.Http
             _config = config;
         }
 
-        public RequestDescription Build(MethodInfo method, params object[] parameters)
+        public RequestDescription Build(MethodInfo method, params object[] arguments)
         {
             var methodOption = method.GetConfigureItem();
             var moduleOption = method.ReflectedType.GetConfigureItem(methodOption);
             //从config中获取
             var configure = string.IsNullOrEmpty(moduleOption.Service)
-                ? _config.Get(method.ReflectedType)
+                ? _config.Get(method.ReflectedType, true)
                 : _config.Get(moduleOption.Service);
             if (configure == null)
                 throw new Exception($"ServiceName:{moduleOption.Service}或{method.ReflectedType}应至少有一项在配置中");
@@ -41,7 +41,7 @@ namespace Rapidity.Http
                 ResponseResolverType = option.ResponseResolverType
             };
             description.Headers.Add(option.DefaultHeaders);
-            return Initialize(description, method, parameters);
+            return Initialize(description, method, arguments);
         }
 
         /// <summary>
@@ -49,14 +49,14 @@ namespace Rapidity.Http
         /// </summary>
         /// <param name="description"></param>
         /// <param name="method"></param>
-        /// <param name="parameters"></param>
+        /// <param name="arguments"></param>
         /// <returns></returns>
-        private RequestDescription Initialize(RequestDescription description, MethodInfo method, object[] parameters)
+        private RequestDescription Initialize(RequestDescription description, MethodInfo method, object[] arguments)
         {
-            parameters = parameters ?? new object[0];
+            arguments = arguments ?? new object[0];
             var methodParameters = method.GetParameters();
-            if (methodParameters.Length != parameters.Length)
-                throw new Exception($"参数{nameof(parameters)}个数与方法{method.Name}的参数个数不一致");
+            if (methodParameters.Length != arguments.Length)
+                throw new Exception($"参数{nameof(arguments)}个数与方法{method.Name}的参数个数不一致");
             //header转换
             var headerAttrOnMethod = method.GetCustomAttributes<HeaderAttribute>();
             foreach (var header in headerAttrOnMethod)
@@ -65,7 +65,7 @@ namespace Rapidity.Http
             for (int index = 0; index < methodParameters.Length; index++)
             {
                 var parameter = methodParameters[index];
-                var parameterValue = parameters[index];
+                var parameterValue = arguments[index];
                 var queryAttr = parameter.GetCustomAttribute<QueryAttribute>();
                 var headerAttr = parameter.GetCustomAttribute<HeaderAttribute>();
                 var bodyAttr = parameter.GetCustomAttribute<BodyAttribute>();

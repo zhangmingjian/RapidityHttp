@@ -26,7 +26,7 @@ namespace Rapidity.Http.Configurations
             while (enumer.MoveNext())
             {
                 current = enumer.Current;
-                if (current != null && current.ServiceName == serviceName)
+                if (current.ServiceName == serviceName)
                     return current;
             }
             return null;
@@ -44,7 +44,28 @@ namespace Rapidity.Http.Configurations
             while (enumer.MoveNext())
             {
                 current = enumer.Current;
-                if (current != null && current.ForTypes.FirstOrDefault(x => x == type) != null)
+                if (current.ForTypes.FirstOrDefault(x => x == type) != null)
+                    return current;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="interfaceSubType">表示当前类型为接口实现类</param>
+        /// <returns></returns>
+        public HttpServiceConfigure Get(Type type, bool interfaceSubType)
+        {
+            HttpServiceConfigure current = null;
+            var enumer = GetEnumerator();
+            while (enumer.MoveNext())
+            {
+                current = enumer.Current;
+                var result = current.ForTypes.FirstOrDefault(x => x == type 
+                                || (interfaceSubType && x.IsInterface && x.IsAssignableFrom(type)));
+                if (result != null)
                     return current;
             }
             return null;

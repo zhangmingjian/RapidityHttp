@@ -23,9 +23,9 @@ namespace Rapidity.Http.DynamicProxies
     internal class ClassTemplate
     {
         /// <summary>
-        /// 源类型
+        /// 实现的接口
         /// </summary>
-        public Type SourceType { get; set; }
+        public Type InterfaceType { get; set; }
 
         /// <summary>
         /// 类名
@@ -73,14 +73,14 @@ namespace Rapidity.Http.DynamicProxies
         {
             Method = method;
             Name = method.Name;
-            IsAsync = method.ReturnType == typeof(Task) || method.ReturnType.Name == "Task`1";
+            IsAsync =  method.ReturnType.FullName.StartsWith(typeof(Task).FullName);
             ReturnType = new TypeTemplate(method.ReturnType);
             foreach (var attr in CustomAttributeData.GetCustomAttributes(method))
                 AttributeList.Add(new CustomAttributeTemplate(attr).ToString());
             //方法参数
             foreach (var parameter in method.GetParameters())
                 Parameters.Add(new ParameterTemplate(parameter));
-
+            
             if (method.IsGenericMethod)
             {
                 foreach (var argumentType in method.GetGenericArguments())
