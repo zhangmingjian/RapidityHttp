@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Rapidity.Http;
 using Rapidity.Http.Attributes;
+using Rapidity.Http.DynamicProxies;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,6 +18,7 @@ namespace Sample.Service
         [Get("/cgi-bin/user/info")]
         [Header("call-from:testserver")]
         Task<UserInfo> GetUserInfo([Query("access_token")]string token, [Query]string openid, [Query]string lang);
+
     }
 
     public class UserList

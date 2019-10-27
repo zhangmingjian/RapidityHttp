@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Rapidity.Http.Configurations
 {
@@ -21,7 +22,6 @@ namespace Rapidity.Http.Configurations
         public HttpServiceConfigure Get(string serviceName)
         {
             HttpServiceConfigure current = null;
-            // ReSharper disable once GenericEnumeratorNotDisposed
             var enumer = GetEnumerator();
             while (enumer.MoveNext())
             {
@@ -40,12 +40,11 @@ namespace Rapidity.Http.Configurations
         public HttpServiceConfigure Get(Type type)
         {
             HttpServiceConfigure current = null;
-            // ReSharper disable once GenericEnumeratorNotDisposed
             var enumer = GetEnumerator();
             while (enumer.MoveNext())
             {
                 current = enumer.Current;
-                if (current != null && current.ForTypes.Contains(type))
+                if (current != null && current.ForTypes.FirstOrDefault(x => x == type) != null)
                     return current;
             }
             return null;

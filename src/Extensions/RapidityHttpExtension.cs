@@ -120,33 +120,33 @@ namespace Rapidity.Http.Extensions
         }
 
         /// <summary>
-        /// 为HttpService创建动态代理
+        /// 为IHttpService创建服务实现
         /// </summary>
         /// <param name="services"></param>
         /// <returns></returns>
         public static IServiceCollection BuildProxy(this IServiceCollection services)
         {
             var configuration = services.ServiceConfigure();
-            var proxyTypes = new Dictionary<HttpServiceConfigure, ICollection<Type>>();
+            var configedTypes = new Dictionary<HttpServiceConfigure, ICollection<Type>>();
             var allTypes = new Collection<Type>();
             foreach (var config in configuration)
             {
-                proxyTypes[config] = new Collection<Type>();
+                configedTypes[config] = new Collection<Type>();
                 foreach (var type in config.ForTypes)
                 {
                     if (!type.IsInterface) continue;
                     if (typeof(IHttpService).IsAssignableFrom(type)
                          || (type.GetCustomAttribute<HttpServiceAttribute>()?.GenerateProxy ?? false))
                     {
-                        proxyTypes[config].Add(type);
+                        configedTypes[config].Add(type);
                         allTypes.Add(type);
                     }
                 }
             }
             var assembly = ProxyGenerator.Generate(allTypes.ToArray());
-            foreach(var config in proxyTypes.Keys)
+            foreach(var config in configedTypes.Keys)
             {
-                foreach(var type in proxyTypes[config])
+                foreach(var type in configedTypes[config])
                 {
                     var proxyType = assembly.GetTypes().First(x => type.IsAssignableFrom(x));
                     services.AddTransient(type, proxyType);

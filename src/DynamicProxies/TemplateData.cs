@@ -13,14 +13,14 @@ namespace Rapidity.Http.DynamicProxies
     /// 模板数据
     /// todo: 1.泛型约束生成 2.泛型方法生成
     /// </summary>
-    public class TemplateData
+    internal class TemplateData
     {
         public ICollection<string> UsingList { get; set; } = new Collection<string>();
 
         public ICollection<ClassTemplate> ClassList { get; set; } = new Collection<ClassTemplate>();
     }
 
-    public class ClassTemplate
+    internal class ClassTemplate
     {
         /// <summary>
         /// 源类型
@@ -59,11 +59,13 @@ namespace Rapidity.Http.DynamicProxies
         /// 方法列表
         /// </summary>
         public ICollection<MethodTemplate> MethodList { get; set; } = new Collection<MethodTemplate>();
+
+        public ICollection<PropertyTemplate> PropertyList { get; set; } = new Collection<PropertyTemplate>();
     }
     /// <summary>
     /// 方法信息
     /// </summary>
-    public class MethodTemplate
+    internal class MethodTemplate
     {
         public MethodInfo Method { get; }
 
@@ -87,11 +89,10 @@ namespace Rapidity.Http.DynamicProxies
                     {
                         Name = argumentType.Name
                     };
-                    Type[] constraints = argumentType.GetGenericParameterConstraints();
-                    foreach (var type in constraints)
-                        argument.Constraints.Add(new TypeTemplate(type).ToString());
+                    GenericArguments.Add(argument);
 
-                    if (argumentType.GenericParameterAttributes == GenericParameterAttributes.None) continue;
+                    if (argumentType.GenericParameterAttributes == GenericParameterAttributes.None
+                        && argumentType.GetGenericParameterConstraints().Length == 0) continue;
 
                     //class约束
                     if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint))
@@ -99,11 +100,15 @@ namespace Rapidity.Http.DynamicProxies
                     //值类型约束
                     if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.NotNullableValueTypeConstraint))
                         argument.Constraints.Add("struct");
+
+                    foreach (var type in argumentType.GetGenericParameterConstraints())
+                        argument.Constraints.Add(new TypeTemplate(type).ToString());
+
                     //无参构造函数
                     if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.DefaultConstructorConstraint))
                         argument.Constraints.Add("new()");
 
-                    GenericArguments.Add(argument);
+
                 }
             }
         }
@@ -140,10 +145,34 @@ namespace Rapidity.Http.DynamicProxies
 
     }
 
+    internal class PropertyTemplate
+    {
+        public PropertyTemplate(PropertyInfo property)
+        {
+            this.Name = property.Name;
+            this.PropertyType = new TypeTemplate(property.PropertyType);
+            this.HasSet = property.CanWrite;
+            this.HasGet = property.CanRead;
+        }
+
+        public string Name { get; set; }
+
+        public TypeTemplate PropertyType { get; set; }
+
+        public bool HasGet { get; set; }
+
+        public bool HasSet { get; set; }
+
+        public override string ToString()
+        {
+            return $"public {PropertyType} {Name} {{ {(HasGet ? "get;" : string.Empty)} {(HasSet ? "set;" : string.Empty)} }}";
+        }
+    }
+
     /// <summary>
     /// 类型模板
     /// </summary>
-    public class TypeTemplate
+    internal class TypeTemplate
     {
         public Type Type { get; }
         public string Name { get; }
@@ -173,7 +202,7 @@ namespace Rapidity.Http.DynamicProxies
                     IsIn = true;
             }
             //type.Namespace 需要考虑是否加上namespace
-            var fullName = typeInfo.FullName ?? typeInfo.Name; //当为泛型类型时，fullname为null
+            var fullName = typeInfo.FullName ?? (typeInfo.IsGenericParameter ? typeInfo.Name : $"{typeInfo.Namespace}.{typeInfo.Name}"); //当为泛型类型时，fullname为null
             var index = fullName.IndexOf('`');
             Name = index == -1 ? fullName : fullName.Substring(0, index);
         }
@@ -195,7 +224,7 @@ namespace Rapidity.Http.DynamicProxies
     /// <summary>
     /// 方法参数模板
     /// </summary>
-    public class ParameterTemplate
+    internal class ParameterTemplate
     {
         private ParameterInfo _parameter;
 
@@ -275,7 +304,7 @@ namespace Rapidity.Http.DynamicProxies
     /// <summary>
     /// 泛型参数信息
     /// </summary>
-    public class GenericArgumentTemplate
+    internal class GenericArgumentTemplate
     {
         /// <summary>
         /// 泛型参数名
@@ -288,7 +317,7 @@ namespace Rapidity.Http.DynamicProxies
         public ICollection<string> Constraints { get; set; } = new Collection<string>();
     }
 
-    public class CustomAttributeTemplate
+    internal class CustomAttributeTemplate
     {
         private CustomAttributeData _attributeData;
 

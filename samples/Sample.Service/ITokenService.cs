@@ -18,11 +18,11 @@ namespace Sample.Service
         Task<AccessToken> GetToken([Query] string appid, [Query]string secret, [Query(Name = "grant_type")]string grantType = "client_credential");
 
         [Get("/cgi-bin/getcallbackip?access_token={token}")]
-        Task<ResponseWrapper<IpList>> GetIpListAsync([Query] string token);
+        Task<ResponseWrapper<IpList>> GetIpListAsync([Query] string token, CancellationToken canToken = default(CancellationToken));
 
         [Post("/cgi-bin/message/template/send?access_token={token}")]
         [Header("header:12121212")]
-        void SendTemplateMsg(string token, [Body(CanNull = false)] MessageTemplate template);
+        ResponseWrapper SendTemplateMsg(string token, [Body(CanNull = false)] MessageTemplate template);
     }
 
 
