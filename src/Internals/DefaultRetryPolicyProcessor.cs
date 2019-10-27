@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
+using Rapidity.Http.Configurations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Rapidity.Http.Configurations;
 
 namespace Rapidity.Http
 {
@@ -53,16 +53,15 @@ namespace Rapidity.Http
             {
                 Request = context.Request,
                 Records = records,
-                Duration = GetDuration(context.Request.TimeStamp)
+                Duration = GetDuration(context.Request.TimeStamp),
+                RetryCount = records.Count() > 1 ? records.Count() - 1 : 0
             };
-            var recordsCount = result.Records.Count();
-            result.RetryCount = recordsCount > 1 ? recordsCount - 1 : 0;
             //获取有效请求记录
-            var validRecord = result.Records.LastOrDefault(x => x.Response != null) ?? result.Records.Last();
-            result.Response = validRecord.Response;
+            var validRecord = result.Records.LastOrDefault(x => x.Response != null) ?? result.Records.LastOrDefault();
+            result.Response = validRecord?.Response;
             if (result.Response != null)
                 result.RawResponse = await result.Response.Content.ReadAsStringAsync();
-            result.Exception = validRecord.Exception;
+            result.Exception = validRecord?.Exception;
             _logger.LogInformation($"请求{context.Request.RequestUri}执行完毕，用时:{result.Duration}ms");
             return result;
         }

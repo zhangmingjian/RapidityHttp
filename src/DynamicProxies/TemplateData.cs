@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rapidity.Http.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -22,9 +23,22 @@ namespace Rapidity.Http.DynamicProxies
     public class ClassTemplate
     {
         /// <summary>
+        /// 源类型
+        /// </summary>
+        public Type SourceType { get; set; }
+
+        /// <summary>
+        /// 类名
+        /// </summary>
+        public string Name { get; set; }
+
+        /// <summary>
         /// 命名空间
         /// </summary>
         public string Namespace { get; set; }
+
+
+        public string FullName => $"{Namespace}.{Name}";
 
         /// <summary>
         /// using语句
@@ -37,20 +51,6 @@ namespace Rapidity.Http.DynamicProxies
         public ICollection<string> AttributeList { get; set; } = new Collection<string>();
 
         /// <summary>
-        /// 类名
-        /// </summary>
-        public string Name { get; set; }
-        /// <summary>
-        /// 实现父类
-        /// </summary>
-        public TypeTemplate BaseClass { get; set; }
-
-        /// <summary>
-        /// 实现的接口
-        /// </summary>
-        public ICollection<TypeTemplate> ImplementInterfaces { get; set; } = new Collection<TypeTemplate>();
-
-        /// <summary>
         /// 泛型参数
         /// </summary>
         public ICollection<GenericArgumentTemplate> GenericArguments { get; } = new Collection<GenericArgumentTemplate>();
@@ -60,19 +60,21 @@ namespace Rapidity.Http.DynamicProxies
         /// </summary>
         public ICollection<MethodTemplate> MethodList { get; set; } = new Collection<MethodTemplate>();
     }
-
+    /// <summary>
+    /// 方法信息
+    /// </summary>
     public class MethodTemplate
     {
-        private readonly MethodInfo _method;
+        public MethodInfo Method { get; }
 
         public MethodTemplate(MethodInfo method)
         {
-            this._method = method;
+            Method = method;
             Name = method.Name;
             IsAsync = method.ReturnType == typeof(Task) || method.ReturnType.Name == "Task`1";
             ReturnType = new TypeTemplate(method.ReturnType);
             foreach (var attr in CustomAttributeData.GetCustomAttributes(method))
-                AttributeList.Add(attr.ToString());
+                AttributeList.Add(new CustomAttributeTemplate(attr).ToString());
             //方法参数
             foreach (var parameter in method.GetParameters())
                 Parameters.Add(new ParameterTemplate(parameter));
@@ -90,12 +92,7 @@ namespace Rapidity.Http.DynamicProxies
                         argument.Constraints.Add(new TypeTemplate(type).ToString());
 
                     if (argumentType.GenericParameterAttributes == GenericParameterAttributes.None) continue;
-                    ////协变
-                    //if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.Covariant))
-                    //    argument.IsOut = true;
-                    ////逆变
-                    //if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.Contravariant))
-                    //    argument.IsIn = true;
+
                     //class约束
                     if (argumentType.GenericParameterAttributes.HasFlag(GenericParameterAttributes.ReferenceTypeConstraint))
                         argument.Constraints.Add("class");
@@ -141,16 +138,6 @@ namespace Rapidity.Http.DynamicProxies
         /// </summary>
         public ICollection<GenericArgumentTemplate> GenericArguments { get; } = new Collection<GenericArgumentTemplate>();
 
-        /// <summary>
-        /// 泛型参数
-        /// </summary>
-        //public ICollection<string> GenericArguments { get; } = new Collection<string>();
-
-        ///// <summary>
-        ///// 泛型约束
-        ///// </summary>
-        //public IDictionary<string, ICollection<string>> GenericConstraints { get; } = new Dictionary<string, ICollection<string>>();
-
     }
 
     /// <summary>
@@ -158,7 +145,12 @@ namespace Rapidity.Http.DynamicProxies
     /// </summary>
     public class TypeTemplate
     {
+        public Type Type { get; }
         public string Name { get; }
+
+        public bool IsIn { get; }
+
+        public bool IsOut { get; }
 
         /// <summary>
         /// 泛型参数
@@ -167,17 +159,29 @@ namespace Rapidity.Http.DynamicProxies
 
         public TypeTemplate(Type type)
         {
-            foreach (var genericType in type.GenericTypeArguments)
+            this.Type = type;
+            var typeInfo = type as TypeInfo;
+            foreach (var genericType in typeInfo.GenericTypeArguments)
                 GenericArguments.Add(new TypeTemplate(genericType));
+            if (typeInfo.IsGenericParameter)
+            {
+                //协变
+                if (typeInfo.GenericParameterAttributes.HasFlag(GenericParameterAttributes.Covariant))
+                    IsOut = true;
+                //逆变
+                if (typeInfo.GenericParameterAttributes.HasFlag(GenericParameterAttributes.Contravariant))
+                    IsIn = true;
+            }
             //type.Namespace 需要考虑是否加上namespace
-            var fullName = type.FullName ?? type.Name; //当为泛型类型时，fullname为null
-            Name = GenericArguments.Count <= 0
-                ? fullName
-                : fullName.Substring(0, fullName.IndexOf('`'));
+            var fullName = typeInfo.FullName ?? typeInfo.Name; //当为泛型类型时，fullname为null
+            var index = fullName.IndexOf('`');
+            Name = index == -1 ? fullName : fullName.Substring(0, index);
         }
 
         public override string ToString()
         {
+            if (Type == typeof(void))
+                return "void";
             var subName = string.Empty;
             if (GenericArguments != null && GenericArguments.Count > 0)
             {
@@ -197,15 +201,14 @@ namespace Rapidity.Http.DynamicProxies
 
         public ParameterTemplate(ParameterInfo info)
         {
-            if (info.Attributes.HasFlag(ParameterAttributes.Out)) throw new NotSupportedException("不支持定义out参数");
-            if (info.Attributes.HasFlag(ParameterAttributes.In)) throw new NotSupportedException("不支持定义in参数");
+            if (info.IsOut) throw new NotSupportedException("不支持定义out参数");
             this._parameter = info;
 
             this.Name = info.Name;
             this.ParameterType = new TypeTemplate(info.ParameterType);
             this.AttributeList = CustomAttributeData.GetCustomAttributes(info)
-                .Where(x => x.AttributeType != typeof(OptionalAttribute))
-                .Select(x => x.ToString()).ToList();
+                                    .Where(x => x.AttributeType != typeof(OptionalAttribute) && x.AttributeType != typeof(ParamArrayAttribute))
+                                    .Select(x => new CustomAttributeTemplate(x).ToString()).ToList();
         }
 
         /// <summary>
@@ -222,41 +225,49 @@ namespace Rapidity.Http.DynamicProxies
         /// 标签列表
         /// </summary>
         public ICollection<string> AttributeList { get; }
+        /// <summary>
+        /// 是否可变数组参数
+        /// </summary>
+        public bool IsParamArray => _parameter.GetCustomAttribute<ParamArrayAttribute>() != null;
 
-        private string DefaultValueToString()
+        public bool IsRef => _parameter.ParameterType.IsByRef;
+
+        public string DefauleValue
         {
-            string value = string.Empty;
-            if (_parameter.IsOptional)
+            get
             {
-                try
+                string value = string.Empty;
+                //可选参数
+                if (_parameter.IsOptional)
                 {
-                    if (_parameter.DefaultValue != null)
+                    try
                     {
-                        if (_parameter.ParameterType == typeof(string))
-                            value = $"\"{_parameter.DefaultValue}\"";
-                        else if (_parameter.ParameterType == typeof(char))
-                            value = $"'{_parameter.DefaultValue}'";
-                        else
-                            value = _parameter.DefaultValue.ToString();
+                        if (_parameter.DefaultValue != null)
+                        {
+                            if (_parameter.ParameterType == typeof(string))
+                                value = $"\"{_parameter.DefaultValue}\"";
+                            else if (_parameter.ParameterType == typeof(char))
+                                value = $"'{_parameter.DefaultValue}'";
+                            else
+                                value = _parameter.DefaultValue.ToString();
+                        }
+                        else value = $"default({ParameterType})";
                     }
-                    else value = $"default({ParameterType})";
+                    catch
+                    {
+                        value = $"default({ParameterType})";
+                    }
                 }
-                catch
-                {
-                    value = $"default({ParameterType})";
-                }
+                return value;
             }
-            return value;
         }
 
         public override string ToString()
         {
-            var value = DefaultValueToString();
-            value = string.IsNullOrEmpty(value) ? value : " = " + value;
+            var value = string.IsNullOrEmpty(DefauleValue) ? DefauleValue : " = " + DefauleValue;
             var attrs = string.Join("", AttributeList);
-            var paramsFlag = _parameter.CustomAttributes
-                                 .FirstOrDefault(x => x.AttributeType == typeof(ParamArrayAttribute)) != null
-                                ? "params " : string.Empty;
+            var paramsFlag = IsParamArray ? "params " : string.Empty;
+            var refFlag = IsRef ? "ref" : string.Empty;
             return $"{attrs}{paramsFlag}{ParameterType} {Name}{value}";
         }
     }
@@ -270,17 +281,97 @@ namespace Rapidity.Http.DynamicProxies
         /// 泛型参数名
         /// </summary>
         public string Name { get; set; }
-        /// <summary>
-        /// 是否逆变
-        /// </summary>
-        public bool IsIn { get; set; }
-        /// <summary>
-        /// 是否协变
-        /// </summary>
-        public bool IsOut { get; set; }
+
         /// <summary>
         /// 泛型约束
         /// </summary>
         public ICollection<string> Constraints { get; set; } = new Collection<string>();
+    }
+
+    public class CustomAttributeTemplate
+    {
+        private CustomAttributeData _attributeData;
+
+        public CustomAttributeTemplate(CustomAttributeData attributeData)
+        {
+            _attributeData = attributeData;
+        }
+
+        public string AttributeName
+        {
+            get
+            {
+                if (_attributeData.AttributeType.Namespace == typeof(HttpServiceAttribute).Namespace)
+                {
+                    return _attributeData.AttributeType.Name.Replace(nameof(Attribute), string.Empty);
+                }
+                return _attributeData.AttributeType.FullName;
+            }
+        }
+
+        public ICollection<string> ConstructorArguments
+        {
+            get
+            {
+                var arguments = new Collection<string>();
+                foreach (var arg in _attributeData.ConstructorArguments)
+                {
+                    if (arg.Value == null) continue;
+                    if (arg.ArgumentType == typeof(string))
+                    {
+                        arguments.Add($"\"{arg.Value}\"");
+                        continue;
+                    }
+                    if (arg.ArgumentType == typeof(char))
+                    {
+                        arguments.Add($"'{arg.Value}'");
+                        continue;
+                    }
+                    if (arg.ArgumentType == typeof(bool))
+                    {
+                        arguments.Add($"{arg.Value?.ToString().ToLower()}");
+                        continue;
+                    }
+                    arguments.Add(arg.ToString());
+                }
+                return arguments;
+            }
+        }
+
+        public IDictionary<string, string> NamedArguments
+        {
+            get
+            {
+                var arguments = new Dictionary<string, string>();
+                foreach (var arg in _attributeData.NamedArguments)
+                {
+                    if (arg.TypedValue.ArgumentType == typeof(string))
+                    {
+                        arguments.Add(arg.MemberName, $"\"{arg.TypedValue.Value}\"");
+                        continue;
+                    }
+                    if (arg.TypedValue.ArgumentType == typeof(char))
+                    {
+                        arguments.Add(arg.MemberName, $"'{arg.TypedValue.Value}'");
+                        continue;
+                    }
+                    if (arg.TypedValue.ArgumentType == typeof(bool))
+                    {
+                        arguments.Add(arg.MemberName, $"{arg.TypedValue.Value?.ToString().ToLower()}");
+                        continue;
+                    }
+                    arguments.Add(arg.MemberName, $"{arg.TypedValue.Value}");
+                }
+                return arguments;
+            }
+        }
+
+
+        public override string ToString()
+        {
+            if (ConstructorArguments.Count <= 0 && NamedArguments.Count <= 0)
+                return $"[{AttributeName}]";
+            return $"[{AttributeName}({string.Join(",", ConstructorArguments)}{(ConstructorArguments.Count > 0 && NamedArguments.Count > 0 ? "," : string.Empty)}{string.Join(",", NamedArguments.Select(x => $"{x.Key}={x.Value}"))})]";
+        }
     }
 }

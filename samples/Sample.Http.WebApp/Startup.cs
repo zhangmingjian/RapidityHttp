@@ -27,7 +27,7 @@ namespace Sample.Http.WebApp
                 config.Timeout = 60;
                 config.Item.ContentType = "application/json";
                 config.Item.DefaultHeaders.Add("customHeader", "fromtest");
-            }).For<ITokenService>();
+            }).For<ITokenService>().For<IUserService>();
             services.BuildProxy();
 
             services.AddMemoryCache();

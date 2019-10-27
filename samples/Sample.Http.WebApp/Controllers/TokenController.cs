@@ -12,12 +12,14 @@ namespace Sample.Http.WebApp.Controllers
     [ApiController]
     public class TokenController : Controller
     {
-        private readonly ITokenService _tokenService;
         private readonly IMemoryCache _cache;
+        private readonly ITokenService _tokenService;
+        private readonly IUserService _userService;
 
-        public TokenController(ITokenService tokenService, IMemoryCache cache)
+        public TokenController(ITokenService tokenService, IUserService userService, IMemoryCache cache)
         {
             _tokenService = tokenService;
+            this._userService = userService;
             _cache = cache;
         }
 
@@ -53,9 +55,26 @@ namespace Sample.Http.WebApp.Controllers
                 url = "https://developers.weixin.qq.com/doc",
                 data = new MessageTemplate.Data()
             };
-             _tokenService.SendTemplateMsg(token.access_token, input);
+            _tokenService.SendTemplateMsg(token.access_token, input);
             await Task.CompletedTask;
             return Content("OK");
+        }
+
+        [HttpGet("/GetUserList")]
+        public async Task<ActionResult> GetUserList()
+        {
+            _cache.TryGetValue("token", out AccessToken token);
+            var list = _userService.GetUserList(token.access_token);
+            return Json(list);
+        }
+
+        [HttpGet("/GetUserInfo")]
+        public async Task<ActionResult> GetUserInfo()
+        {
+            _cache.TryGetValue("token", out AccessToken token);
+            var list = _userService.GetUserList(token.access_token);
+            var info = await _userService.GetUserInfo(token.access_token, list.NextOpenid,"ch");
+            return Json(info);
         }
 
         // PUT api/values/5

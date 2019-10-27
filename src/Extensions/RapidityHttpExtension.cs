@@ -7,6 +7,8 @@ using System.Linq;
 using Rapidity.Http.Attributes;
 using System.Reflection;
 using Rapidity.Http.DynamicProxies;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Rapidity.Http.Extensions
 {
@@ -125,21 +127,32 @@ namespace Rapidity.Http.Extensions
         public static IServiceCollection BuildProxy(this IServiceCollection services)
         {
             var configuration = services.ServiceConfigure();
+            var proxyTypes = new Dictionary<HttpServiceConfigure, ICollection<Type>>();
+            var allTypes = new Collection<Type>();
             foreach (var config in configuration)
             {
+                proxyTypes[config] = new Collection<Type>();
                 foreach (var type in config.ForTypes)
                 {
                     if (!type.IsInterface) continue;
                     if (typeof(IHttpService).IsAssignableFrom(type)
                          || (type.GetCustomAttribute<HttpServiceAttribute>()?.GenerateProxy ?? false))
                     {
-                        //var proxyType = ProxyGenerator.Generate(type);
-                        //services.AddTransient(type, proxyType);
-                        services.AddSingleton(type, provider => ServiceProxy.Create(type, provider));
+                        proxyTypes[config].Add(type);
+                        allTypes.Add(type);
                     }
                 }
             }
-
+            var assembly = ProxyGenerator.Generate(allTypes.ToArray());
+            foreach(var config in proxyTypes.Keys)
+            {
+                foreach(var type in proxyTypes[config])
+                {
+                    var proxyType = assembly.GetTypes().First(x => type.IsAssignableFrom(x));
+                    services.AddTransient(type, proxyType);
+                    config.ForTypes(proxyType);
+                }
+            }
             return services;
         }
 
