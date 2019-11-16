@@ -25,7 +25,7 @@ namespace Rapidity.Http
                 : _config.Get(moduleOption.Service);
             if (configure == null)
                 throw new Exception($"ServiceName:{moduleOption.Service}或{method.ReflectedType}应至少有一项在配置中");
-            var option = moduleOption.Option.Union(configure.GetConfigureItem(moduleOption.Module), true);
+            var option = moduleOption.Option.Union(configure.GetHttpOption(moduleOption.Module), true);
 
             var description = new RequestDescription
             {

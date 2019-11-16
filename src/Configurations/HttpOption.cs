@@ -7,7 +7,7 @@ namespace Rapidity.Http.Configurations
     /// <summary>
     /// 当前请求配置参数
     /// </summary>
-    public class HttpConfigureItem
+    public class HttpOption
     {
         /// <summary>
         /// 请求url
@@ -59,9 +59,9 @@ namespace Rapidity.Http.Configurations
         /// <param name="other"></param>
         /// <param name="isRoot"></param>
         /// <returns></returns>
-        public virtual HttpConfigureItem Union(HttpConfigureItem other, bool isRoot = false)
+        public virtual HttpOption Union(HttpOption other, bool isRoot = false)
         {
-            var option = new HttpConfigureItem
+            var option = new HttpOption
             {
                 Uri = this.Uri,
                 Method = this.Method,

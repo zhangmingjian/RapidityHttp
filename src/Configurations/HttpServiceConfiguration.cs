@@ -19,9 +19,9 @@ namespace Rapidity.Http.Configurations
         /// </summary>
         /// <param name="serviceName"></param>
         /// <returns></returns>
-        public HttpServiceConfigure Get(string serviceName)
+        public HttpServiceConfigureItem Get(string serviceName)
         {
-            HttpServiceConfigure current = null;
+            HttpServiceConfigureItem current = null;
             var enumer = GetEnumerator();
             while (enumer.MoveNext())
             {
@@ -37,9 +37,9 @@ namespace Rapidity.Http.Configurations
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public HttpServiceConfigure Get(Type type)
+        public HttpServiceConfigureItem Get(Type type)
         {
-            HttpServiceConfigure current = null;
+            HttpServiceConfigureItem current = null;
             var enumer = GetEnumerator();
             while (enumer.MoveNext())
             {
@@ -56,9 +56,9 @@ namespace Rapidity.Http.Configurations
         /// <param name="type"></param>
         /// <param name="interfaceSubType">表示当前类型为接口实现类</param>
         /// <returns></returns>
-        public HttpServiceConfigure Get(Type type, bool interfaceSubType)
+        public HttpServiceConfigureItem Get(Type type, bool interfaceSubType)
         {
-            HttpServiceConfigure current = null;
+            HttpServiceConfigureItem current = null;
             var enumer = GetEnumerator();
             while (enumer.MoveNext())
             {
@@ -76,7 +76,7 @@ namespace Rapidity.Http.Configurations
         /// </summary>
         /// <param name="config"></param>
         /// <returns></returns>
-        public HttpServiceConfigure AddConfigure(HttpServiceConfigure config)
+        public HttpServiceConfigureItem AddConfigure(HttpServiceConfigureItem config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
             if (string.IsNullOrWhiteSpace(config.ServiceName)) throw new ArgumentNullException(nameof(config.ServiceName));
@@ -87,7 +87,7 @@ namespace Rapidity.Http.Configurations
             return config;
         }
 
-        public IEnumerator<HttpServiceConfigure> GetEnumerator()
+        public IEnumerator<HttpServiceConfigureItem> GetEnumerator()
         {
             return new ConfigureEnumerator(_innerList.ToArray());
         }
@@ -97,7 +97,7 @@ namespace Rapidity.Http.Configurations
             return GetEnumerator();
         }
 
-        class ConfigureEnumerator : IEnumerator<HttpServiceConfigure>
+        class ConfigureEnumerator : IEnumerator<HttpServiceConfigureItem>
         {
             private readonly object[] configures;
             private int _index = -1;
@@ -118,7 +118,7 @@ namespace Rapidity.Http.Configurations
                 _index = 0;
             }
 
-            public HttpServiceConfigure Current => (HttpServiceConfigure)configures[_index];
+            public HttpServiceConfigureItem Current => (HttpServiceConfigureItem)configures[_index];
 
             object IEnumerator.Current => Current;
 

@@ -60,6 +60,9 @@ namespace Rapidity.Http.DynamicProxies
         /// </summary>
         public ICollection<MethodTemplate> MethodList { get; set; } = new Collection<MethodTemplate>();
 
+        /// <summary>
+        /// 属性列表
+        /// </summary>
         public ICollection<PropertyTemplate> PropertyList { get; set; } = new Collection<PropertyTemplate>();
     }
     /// <summary>
@@ -73,14 +76,14 @@ namespace Rapidity.Http.DynamicProxies
         {
             Method = method;
             Name = method.Name;
-            IsAsync =  method.ReturnType.FullName.StartsWith(typeof(Task).FullName);
+            IsAsync = method.ReturnType.FullName.StartsWith(typeof(Task).FullName);
             ReturnType = new TypeTemplate(method.ReturnType);
             foreach (var attr in CustomAttributeData.GetCustomAttributes(method))
                 AttributeList.Add(new CustomAttributeTemplate(attr).ToString());
             //方法参数
             foreach (var parameter in method.GetParameters())
                 Parameters.Add(new ParameterTemplate(parameter));
-            
+
             if (method.IsGenericMethod)
             {
                 foreach (var argumentType in method.GetGenericArguments())
@@ -114,12 +117,12 @@ namespace Rapidity.Http.DynamicProxies
         }
 
         /// <summary>
-        /// 
+        /// 方法名
         /// </summary>
         public string Name { get; }
 
         /// <summary>
-        /// 标签列表
+        /// Attribute标签列表
         /// </summary>
         public ICollection<string> AttributeList { get; } = new Collection<string>();
 
@@ -201,8 +204,13 @@ namespace Rapidity.Http.DynamicProxies
                 if (typeInfo.GenericParameterAttributes.HasFlag(GenericParameterAttributes.Contravariant))
                     IsIn = true;
             }
+            var typeNamespace = typeInfo.Namespace;
+            var typeName = typeInfo.Name;
+
+            var fullName = typeInfo.FullName ?? (typeInfo.IsGenericParameter ? typeName : $"{typeNamespace}.{typeName}"); //当为泛型类型时，fullname为null                                                                                                                         //当为ref参数时需要移除类型后面的&标识
             //type.Namespace 需要考虑是否加上namespace
-            var fullName = typeInfo.FullName ?? (typeInfo.IsGenericParameter ? typeInfo.Name : $"{typeInfo.Namespace}.{typeInfo.Name}"); //当为泛型类型时，fullname为null
+            if (typeInfo.IsByRef)
+                fullName = fullName.TrimEnd('&');
             var index = fullName.IndexOf('`');
             Name = index == -1 ? fullName : fullName.Substring(0, index);
         }
@@ -251,7 +259,7 @@ namespace Rapidity.Http.DynamicProxies
         public TypeTemplate ParameterType { get; }
 
         /// <summary>
-        /// 标签列表
+        /// Attribute标签列表
         /// </summary>
         public ICollection<string> AttributeList { get; }
         /// <summary>
@@ -273,12 +281,21 @@ namespace Rapidity.Http.DynamicProxies
                     {
                         if (_parameter.DefaultValue != null)
                         {
-                            if (_parameter.ParameterType == typeof(string))
-                                value = $"\"{_parameter.DefaultValue}\"";
-                            else if (_parameter.ParameterType == typeof(char))
-                                value = $"'{_parameter.DefaultValue}'";
-                            else
-                                value = _parameter.DefaultValue.ToString();
+                            switch (Type.GetTypeCode(_parameter.ParameterType))
+                            {
+                                case TypeCode.String:
+                                    value = $"\"{_parameter.DefaultValue}\"";
+                                    break;
+                                case TypeCode.Char:
+                                    value = $"'{_parameter.DefaultValue}'";
+                                    break;
+                                case TypeCode.Boolean:
+                                    value = _parameter.DefaultValue.ToString().ToLower();
+                                    break;
+                                default:
+                                    value = _parameter.DefaultValue.ToString();
+                                    break;
+                            }
                         }
                         else value = $"default({ParameterType})";
                     }
@@ -296,8 +313,8 @@ namespace Rapidity.Http.DynamicProxies
             var value = string.IsNullOrEmpty(DefauleValue) ? DefauleValue : " = " + DefauleValue;
             var attrs = string.Join("", AttributeList);
             var paramsFlag = IsParamArray ? "params " : string.Empty;
-            var refFlag = IsRef ? "ref" : string.Empty;
-            return $"{attrs}{paramsFlag}{ParameterType} {Name}{value}";
+            var refFlag = IsRef ? "ref " : string.Empty;
+            return $"{attrs}{refFlag}{paramsFlag}{ParameterType} {Name}{value}";
         }
     }
 
@@ -337,7 +354,7 @@ namespace Rapidity.Http.DynamicProxies
                 return _attributeData.AttributeType.FullName;
             }
         }
-
+       
         public ICollection<string> ConstructorArguments
         {
             get
@@ -346,22 +363,21 @@ namespace Rapidity.Http.DynamicProxies
                 foreach (var arg in _attributeData.ConstructorArguments)
                 {
                     if (arg.Value == null) continue;
-                    if (arg.ArgumentType == typeof(string))
+                    switch(Type.GetTypeCode(arg.ArgumentType))
                     {
-                        arguments.Add($"\"{arg.Value}\"");
-                        continue;
+                        case TypeCode.String:
+                            arguments.Add($"\"{arg.Value}\"");
+                            break;
+                        case TypeCode.Char:
+                            arguments.Add($"'{arg.Value}'");
+                            break;
+                        case TypeCode.Boolean:
+                            arguments.Add($"{arg.Value.ToString().ToLower()}");
+                            break;
+                        default:
+                            arguments.Add(arg.ToString());
+                            break;
                     }
-                    if (arg.ArgumentType == typeof(char))
-                    {
-                        arguments.Add($"'{arg.Value}'");
-                        continue;
-                    }
-                    if (arg.ArgumentType == typeof(bool))
-                    {
-                        arguments.Add($"{arg.Value?.ToString().ToLower()}");
-                        continue;
-                    }
-                    arguments.Add(arg.ToString());
                 }
                 return arguments;
             }
@@ -374,22 +390,21 @@ namespace Rapidity.Http.DynamicProxies
                 var arguments = new Dictionary<string, string>();
                 foreach (var arg in _attributeData.NamedArguments)
                 {
-                    if (arg.TypedValue.ArgumentType == typeof(string))
+                    switch(Type.GetTypeCode(arg.TypedValue.ArgumentType))
                     {
-                        arguments.Add(arg.MemberName, $"\"{arg.TypedValue.Value}\"");
-                        continue;
+                        case TypeCode.String:
+                            arguments.Add(arg.MemberName, $"\"{arg.TypedValue.Value}\"");
+                            break;
+                        case TypeCode.Char:
+                            arguments.Add(arg.MemberName, $"'{arg.TypedValue.Value}'");
+                            break;
+                        case TypeCode.Boolean:
+                            arguments.Add(arg.MemberName, $"{arg.TypedValue.Value?.ToString().ToLower()}");
+                            break;
+                        default:
+                            arguments.Add(arg.MemberName, $"{arg.TypedValue.Value}");
+                            break;
                     }
-                    if (arg.TypedValue.ArgumentType == typeof(char))
-                    {
-                        arguments.Add(arg.MemberName, $"'{arg.TypedValue.Value}'");
-                        continue;
-                    }
-                    if (arg.TypedValue.ArgumentType == typeof(bool))
-                    {
-                        arguments.Add(arg.MemberName, $"{arg.TypedValue.Value?.ToString().ToLower()}");
-                        continue;
-                    }
-                    arguments.Add(arg.MemberName, $"{arg.TypedValue.Value}");
                 }
                 return arguments;
             }

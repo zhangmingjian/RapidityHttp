@@ -15,14 +15,14 @@ namespace Rapidity.Http.Extensions
         /// </summary>
         /// <param name="method"></param>
         /// <returns></returns>
-        public static NamedHttpConfigureItem GetConfigureItem(this MethodBase method)
+        public static NamedHttpOption GetConfigureItem(this MethodBase method)
         {
             var httpAttr = method.GetCustomAttribute<HttpServiceAttribute>(false);
             var cacheAttr = method.GetCustomAttribute<CacheAttribute>(false);
             var retryAttr = method.GetCustomAttribute<RetryAttribute>(false);
-            var namedOption = new NamedHttpConfigureItem
+            var namedOption = new NamedHttpOption
             {
-                Option = new HttpConfigureItem
+                Option = new HttpOption
                 {
                     CacheOption = cacheAttr?.GetCacheOption(),
                     RetryOption = retryAttr?.GetRetryOption()
@@ -48,15 +48,15 @@ namespace Rapidity.Http.Extensions
         /// <param name="type"></param>
         /// <param name="onMethodConfig"></param>
         /// <returns></returns>
-        public static NamedHttpConfigureItem GetConfigureItem(this Type type, NamedHttpConfigureItem onMethodConfig)
+        public static NamedHttpOption GetConfigureItem(this Type type, NamedHttpOption onMethodConfig)
         {
             var httpAttr = type.GetCustomAttribute<HttpServiceAttribute>(false);
             var cacheAttr = type.GetCustomAttribute<CacheAttribute>(false);
             var retryAttr = type.GetCustomAttribute<RetryAttribute>(false);
           
-            var namedOption = new NamedHttpConfigureItem
+            var namedOption = new NamedHttpOption
             {
-                Option = new HttpConfigureItem
+                Option = new HttpOption
                 {
                     CacheOption = cacheAttr?.GetCacheOption(),
                     RetryOption = retryAttr?.GetRetryOption(),
@@ -90,12 +90,12 @@ namespace Rapidity.Http.Extensions
         }
     }
 
-    internal class NamedHttpConfigureItem
+    internal class NamedHttpOption
     {
         public string Service { get; set; }
 
         public string Module { get; set; }
 
-        public HttpConfigureItem Option { get; set; }
+        public HttpOption Option { get; set; }
     }
 }

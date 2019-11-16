@@ -8,7 +8,7 @@ namespace Rapidity.Http.Configurations
     /// httpservice的配置
     /// 一个应用程序可以包含N个httpService,一个httpService下会有N个Module, module的配置会覆盖service中的配置项
     /// </summary>
-    public class HttpServiceConfigure
+    public class HttpServiceConfigureItem
     {
         /// <summary>
         /// 服务名称
@@ -20,8 +20,8 @@ namespace Rapidity.Http.Configurations
         /// </summary>
         public string BaseAddress
         {
-            get => this.Item.Uri;
-            set => this.Item.Uri = value;
+            get => this.Option.Uri;
+            set => this.Option.Uri = value;
         }
 
         /// <summary>
@@ -37,24 +37,24 @@ namespace Rapidity.Http.Configurations
         /// <summary>
         /// 请求相关参数配置，通用部分，module内的配置会覆盖root中的内容
         /// </summary>
-        public HttpConfigureItem Item { get; set; } = new HttpConfigureItem();
+        public HttpOption Option { get; set; } = new HttpOption();
 
         /// <summary>
         /// 服务下的模块配置
         /// </summary>
-        public IDictionary<string, HttpConfigureItem> ModuleItems { get; set; } = new Dictionary<string, HttpConfigureItem>();
+        public IDictionary<string, HttpOption> ModuleOptions { get; set; } = new Dictionary<string, HttpOption>();
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="moduleName"></param>
         /// <returns></returns>
-        public HttpConfigureItem GetConfigureItem(string moduleName)
+        public HttpOption GetHttpOption(string moduleName)
         {
-            if (string.IsNullOrEmpty(moduleName) || !ModuleItems.ContainsKey(moduleName))
-                return this.Item;
-            var moduleOption = ModuleItems[moduleName];
-            return moduleOption.Union(this.Item, true);
+            if (string.IsNullOrEmpty(moduleName) || !ModuleOptions.ContainsKey(moduleName))
+                return this.Option;
+            var moduleOption = ModuleOptions[moduleName];
+            return moduleOption.Union(this.Option, true);
         }
     }
 }

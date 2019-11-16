@@ -17,7 +17,7 @@ namespace Rapidity.Http.Extensions
     /// </summary>
     public static class RapidityHttpExtension
     {
-        public static IServiceCollection UseRapidityHttp(this IServiceCollection services)
+        public static IServiceCollection AddRapidityHttp(this IServiceCollection services)
         {
             services.TryAddTransient<IJsonContentSerializer, NewtonsoftJsonSerializer>();
             services.TryAddTransient<IXmlContentSerializer, XmlContentSerializer>();
@@ -62,7 +62,7 @@ namespace Rapidity.Http.Extensions
         /// <param name="services"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        public static HttpServiceConfigure AddService(this IServiceCollection services, HttpServiceConfigure configure)
+        public static HttpServiceConfigureItem AddService(this IServiceCollection services, HttpServiceConfigureItem configure)
         {
             var configuration = services.ServiceConfigure();
 
@@ -73,10 +73,10 @@ namespace Rapidity.Http.Extensions
                 if (!string.IsNullOrEmpty(config.BaseAddress))
                     client.BaseAddress = new Uri(config.BaseAddress, UriKind.Absolute);
                 //设置默认headers
-                if (config.Item.DefaultHeaders.Count > 0)
+                if (config.Option.DefaultHeaders.Count > 0)
                 {
-                    foreach (var key in config.Item.DefaultHeaders.AllKeys)
-                        client.DefaultRequestHeaders.Add(key, config.Item.DefaultHeaders.Get(key));
+                    foreach (var key in config.Option.DefaultHeaders.AllKeys)
+                        client.DefaultRequestHeaders.Add(key, config.Option.DefaultHeaders.Get(key));
                 }
                 //设置请求超时时间(默认30秒)
                 client.Timeout = TimeSpan.FromSeconds(config.Timeout > 0 ? config.Timeout : 30);
@@ -91,9 +91,9 @@ namespace Rapidity.Http.Extensions
         /// <param name="services"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static HttpServiceConfigure AddService(this IServiceCollection services, string name)
+        public static HttpServiceConfigureItem AddService(this IServiceCollection services, string name)
         {
-            var configure = new HttpServiceConfigure
+            var configure = new HttpServiceConfigureItem
             {
                 ServiceName = name
             };
@@ -107,9 +107,9 @@ namespace Rapidity.Http.Extensions
         /// <param name="name"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        public static HttpServiceConfigure AddService(this IServiceCollection services, string name, Action<HttpServiceConfigure> action)
+        public static HttpServiceConfigureItem AddService(this IServiceCollection services, string name, Action<HttpServiceConfigureItem> action)
         {
-            var configure = new HttpServiceConfigure
+            var configure = new HttpServiceConfigureItem
             {
                 ServiceName = name
             };
@@ -156,6 +156,16 @@ namespace Rapidity.Http.Extensions
         public static IServiceCollection ConfigRecordStore<TRecordStore>(this IServiceCollection services) where TRecordStore : IInvokeRecordStore
         {
             return services.Replace(ServiceDescriptor.Transient(typeof(IInvokeRecordStore), typeof(TRecordStore)));
+        }
+
+        /// <summary>
+        /// 配置默认日志记录器
+        /// </summary>
+        /// <param name="services"></param>
+        /// <returns></returns>
+        public static IServiceCollection ConfigDefaultRecordStore(this IServiceCollection services)
+        {
+            return services.ConfigRecordStore<TextInvokeRecordStore>();
         }
     }
 }

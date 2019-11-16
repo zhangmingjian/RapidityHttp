@@ -85,25 +85,25 @@
             public const string Webm = "video/webm";
         }
 
-        public static string GetByExtension(string extension)
-        {
-            //extension = extension.RemovePreFix(".").ToLowerInvariant();
+        //public static string GetByExtension(string extension)
+        //{
+        //    //extension = extension.RemovePreFix(".").ToLowerInvariant();
 
-            switch (extension)
-            {
-                case "png":
-                    return Image.Png;
-                case "gif":
-                    return Image.Gif;
-                case "jpg":
-                case "jpeg":
-                    return Image.Jpeg;
+        //    switch (extension)
+        //    {
+        //        case "png":
+        //            return Image.Png;
+        //        case "gif":
+        //            return Image.Gif;
+        //        case "jpg":
+        //        case "jpeg":
+        //            return Image.Jpeg;
 
-                //TODO: Add other extensions too..
+        //        //TODO: Add other extensions too..
 
-                default:
-                    return Application.OctetStream;
-            }
-        }
+        //        default:
+        //            return Application.OctetStream;
+        //    }
+        //}
     }
 }

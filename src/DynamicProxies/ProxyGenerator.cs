@@ -34,9 +34,9 @@ namespace Rapidity.Http.DynamicProxies
             var compilation = CSharpCompilation.Create("DynamicGenerated")
                 .WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
                 //基础类库引用
-                .AddReferences(MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location))
                 .AddReferences(MetadataReference.CreateFromFile(Path.Combine(dotnetCoreDirectory, "netstandard.dll")))
                 .AddReferences(MetadataReference.CreateFromFile(Path.Combine(dotnetCoreDirectory, "System.Runtime.dll")))
+                .AddReferences(MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location))
                 .AddReferences(MetadataReference.CreateFromFile(typeof(ProxyGenerator).GetTypeInfo().Assembly.Location))
                 //添加所有types的引用
                 .AddReferences(types.Select(x => MetadataReference.CreateFromFile(x.GetTypeInfo().Assembly.Location)))
@@ -65,9 +65,9 @@ namespace Rapidity.Http.DynamicProxies
         {
             var template = new TemplateData();
 
-            template.UsingList.Add(typeof(int).Namespace);
+            template.UsingList.Add(typeof(object).Namespace);
+            template.UsingList.Add(typeof(Thread).Namespace);
             template.UsingList.Add(typeof(Task).Namespace);
-            template.UsingList.Add(typeof(CancellationToken).Namespace);
             template.UsingList.Add(typeof(IHttpService).Namespace);
             template.UsingList.Add(typeof(HttpServiceAttribute).Namespace);
             template.UsingList.Add(typeof(HttpClientWrapperExtension).Namespace);
@@ -261,7 +261,7 @@ namespace Rapidity.Http.DynamicProxies
             var code = builder.ToString();
 
 #if DEBUG
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "generatedcode.cs");
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedCode.cs");
             File.WriteAllText(path, code);
 #endif
             return code;
@@ -329,7 +329,8 @@ namespace Rapidity.Http.DynamicProxies
         private static string RandomName(int length = 16)
         {
             var source = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            var random = new Random(DateTime.Now.GetHashCode());
+            var seed = BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 0);
+            var random = new Random(seed);
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < length; i++)
             {
@@ -342,11 +343,17 @@ namespace Rapidity.Http.DynamicProxies
 
     internal static class StringBuilderExtension
     {
+        /// <summary>
+        /// 添加缩进
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="level"></param>
+        /// <returns></returns>
         public static StringBuilder AppendIndent(this StringBuilder builder, int level)
         {
             if (level <= 0) return builder;
             for (int i = 0; i < level; i++)
-                builder.Append("    ");
+                builder.Append("\t");
             return builder;
         }
     }

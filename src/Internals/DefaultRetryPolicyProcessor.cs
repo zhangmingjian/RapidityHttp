@@ -39,7 +39,7 @@ namespace Rapidity.Http
                  return await SendWithRetryAsync(option, context.Request, sending, records, timeoutToken.Token);
              }, record =>
              {
-                 //只有执行超时才会抛ExecutionHttpException，同时意味着重试结束
+                 //只有执行超时才会抛ExecutionHttpException，意味着重试结束
                  if (record.Exception is ExecutionHttpException executionEx)
                  {
                      record.Request = executionEx.Request;

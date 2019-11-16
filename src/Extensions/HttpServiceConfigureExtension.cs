@@ -14,7 +14,7 @@ namespace Rapidity.Http.Extensions
         /// <param name="serviceConfigure"></param>
         /// <param name="types"></param>
         /// <returns></returns>
-        public static HttpServiceConfigure ForTypes(this HttpServiceConfigure serviceConfigure, params Type[] types)
+        public static HttpServiceConfigureItem ForTypes(this HttpServiceConfigureItem serviceConfigure, params Type[] types)
         {
             var list = serviceConfigure.ForTypes.ToList();
             list.AddRange(types);
@@ -28,7 +28,7 @@ namespace Rapidity.Http.Extensions
         /// <param name="serviceConfigure"></param>
         /// <param name="assembly"></param>
         /// <returns></returns>
-        public static HttpServiceConfigure ForTypes(this HttpServiceConfigure serviceConfigure, Assembly assembly)
+        public static HttpServiceConfigureItem ForTypes(this HttpServiceConfigureItem serviceConfigure, Assembly assembly)
         {
             if (assembly == null) throw new ArgumentNullException(nameof(assembly));
             var types = assembly.GetTypes()
@@ -42,7 +42,7 @@ namespace Rapidity.Http.Extensions
         /// <typeparam name="TService"></typeparam>
         /// <param name="serviceConfigure"></param>
         /// <returns></returns>
-        public static HttpServiceConfigure For<TService>(this HttpServiceConfigure serviceConfigure)
+        public static HttpServiceConfigureItem For<TService>(this HttpServiceConfigureItem serviceConfigure)
         {
             serviceConfigure.ForTypes.Add(typeof(TService));
             return serviceConfigure;
@@ -55,9 +55,9 @@ namespace Rapidity.Http.Extensions
         /// <param name="moduleName"></param>
         /// <param name="option"></param>
         /// <returns></returns>
-        public static HttpServiceConfigure AddModule(this HttpServiceConfigure serviceConfigure, string moduleName, HttpConfigureItem option)
+        public static HttpServiceConfigureItem AddModule(this HttpServiceConfigureItem serviceConfigure, string moduleName, HttpOption option)
         {
-            serviceConfigure.ModuleItems[moduleName] = option;
+            serviceConfigure.ModuleOptions[moduleName] = option;
             return serviceConfigure;
         }
 
@@ -68,11 +68,11 @@ namespace Rapidity.Http.Extensions
         /// <param name="moduleName"></param>
         /// <param name="configAction"></param>
         /// <returns></returns>
-        public static HttpServiceConfigure AddModule(this HttpServiceConfigure serviceConfigure, string moduleName, Action<HttpConfigureItem> configAction)
+        public static HttpServiceConfigureItem AddModule(this HttpServiceConfigureItem serviceConfigure, string moduleName, Action<HttpOption> configAction)
         {
-            var option = new HttpConfigureItem();
+            var option = new HttpOption();
             configAction?.Invoke(option);
-            serviceConfigure.ModuleItems[moduleName] = option;
+            serviceConfigure.ModuleOptions[moduleName] = option;
             return serviceConfigure;
         }
     }

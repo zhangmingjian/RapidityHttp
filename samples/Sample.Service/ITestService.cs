@@ -24,8 +24,8 @@ namespace Sample.Service
     {
         [Get("/send/{data}")]
         [Header("afee:jfkejlfe")]
-        [CacheAttribute(true, 10000)]
-        Task Send(IEnumerable<TData> list, params string[] data);
+        [Cache(true, 10000)]
+        Task Send(IEnumerable<TData> list, bool flag = true);
     }
 }
 
