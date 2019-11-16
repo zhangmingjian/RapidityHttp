@@ -5,7 +5,7 @@ RapidityHttp是对HttpClient的包装，内含重试，熔断降级，请求缓�
 
     public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRapidityHttp().ConfigRecordStore<TextInvokeRecordStore>().AddService("wechat", config =>
+            services.AddRapidityHttp().ConfigRecordStore<TextInvokeRecordStore>().AddHttpService("wechat", config =>
             {
                 config.BaseAddress = "https://api.weixin.qq.com/";
                 config.Timeout = 60;
