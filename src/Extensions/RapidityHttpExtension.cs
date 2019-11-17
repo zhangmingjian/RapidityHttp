@@ -62,7 +62,7 @@ namespace Rapidity.Http.Extensions
         /// <param name="services"></param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        public static HttpServiceConfigureItem AddService(this IServiceCollection services, HttpServiceConfigureItem configure)
+        public static HttpServiceConfigureItem AddHttpService(this IServiceCollection services, HttpServiceConfigureItem configure)
         {
             var configuration = services.ServiceConfigure();
 
@@ -91,13 +91,13 @@ namespace Rapidity.Http.Extensions
         /// <param name="services"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static HttpServiceConfigureItem AddService(this IServiceCollection services, string name)
+        public static HttpServiceConfigureItem AddHttpService(this IServiceCollection services, string name)
         {
             var configure = new HttpServiceConfigureItem
             {
                 ServiceName = name
             };
-            return services.AddService(configure);
+            return services.AddHttpService(configure);
         }
 
         /// <summary>
@@ -107,14 +107,14 @@ namespace Rapidity.Http.Extensions
         /// <param name="name"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        public static HttpServiceConfigureItem AddService(this IServiceCollection services, string name, Action<HttpServiceConfigureItem> action)
+        public static HttpServiceConfigureItem AddHttpService(this IServiceCollection services, string name, Action<HttpServiceConfigureItem> action)
         {
             var configure = new HttpServiceConfigureItem
             {
                 ServiceName = name
             };
             action?.Invoke(configure);
-            return services.AddService(configure);
+            return services.AddHttpService(configure);
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace Rapidity.Http.Extensions
         public static IServiceCollection BuildProxy(this IServiceCollection services)
         {
             var configuration = services.ServiceConfigure();
-            var allTypes = new Collection<Type>();
+            var types = new Collection<Type>();
             foreach (var config in configuration)
             {
                 foreach (var type in config.ForTypes)
@@ -134,12 +134,12 @@ namespace Rapidity.Http.Extensions
                     if (typeof(IHttpService).IsAssignableFrom(type)
                          || (type.GetCustomAttribute<HttpServiceAttribute>()?.GenerateProxy ?? false))
                     {
-                        allTypes.Add(type);
+                        types.Add(type);
                     }
                 }
             }
-            var assembly = ProxyGenerator.Generate(allTypes.ToArray());
-            foreach (var type in allTypes)
+            var assembly = ProxyGenerator.Generate(types.ToArray());
+            foreach (var type in types)
             {
                 var proxyType = assembly.ExportedTypes.First(x => type.IsAssignableFrom(x));
                 services.AddTransient(type, proxyType);

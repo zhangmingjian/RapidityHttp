@@ -61,9 +61,9 @@ namespace Rapidity.Http.DynamicProxies
         /// </summary>
         /// <param name="types"></param>
         /// <returns></returns>
-        internal static TemplateData BuildTemplate(Type[] types)
+        internal static TemplateMetadata BuildTemplate(Type[] types)
         {
-            var template = new TemplateData();
+            var template = new TemplateMetadata();
 
             template.UsingList.Add(typeof(object).Namespace);
             template.UsingList.Add(typeof(Thread).Namespace);
@@ -138,7 +138,7 @@ namespace Rapidity.Http.DynamicProxies
         /// </summary>
         /// <param name="template"></param>
         /// <returns></returns>
-        internal static string GenerateCode(TemplateData template)
+        internal static string GenerateCode(TemplateMetadata template)
         {
             StringBuilder builder = new StringBuilder();
 

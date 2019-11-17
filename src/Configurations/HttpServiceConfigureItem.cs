@@ -32,7 +32,7 @@ namespace Rapidity.Http.Configurations
         /// <summary>
         /// 表示哪些类型能使用当前服务配置
         /// </summary>
-        public ICollection<Type> ForTypes { get; set; } = new Collection<Type>();
+        public ICollection<Type> ForTypes { get; set; } = new HashSet<Type>();
 
         /// <summary>
         /// 请求相关参数配置，通用部分，module内的配置会覆盖root中的内容

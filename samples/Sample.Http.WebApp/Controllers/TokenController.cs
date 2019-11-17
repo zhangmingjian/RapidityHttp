@@ -8,7 +8,7 @@ using Sample.Service;
 
 namespace Sample.Http.WebApp.Controllers
 {
-    [Route("api/[controller]")]
+    //[Route("api/[controller]")]
     [ApiController]
     public class TokenController : Controller
     {
@@ -24,8 +24,8 @@ namespace Sample.Http.WebApp.Controllers
         }
 
         // GET api/values
-        [HttpGet]
-        public async Task<AccessToken> Get()
+        [HttpGet("/gettoken")]
+        public async Task<AccessToken> GetToken()
         {
             var appid = "wx431ac6b88d367ede";
             var secret = "7fc5f5411e0127f21ff413c521736044";
@@ -63,6 +63,7 @@ namespace Sample.Http.WebApp.Controllers
         [HttpGet("/GetUserList")]
         public async Task<ActionResult> GetUserList()
         {
+            await Task.CompletedTask;
             _cache.TryGetValue("token", out AccessToken token);
             var list = _userService.GetUserList(token.access_token);
             return Json(list);

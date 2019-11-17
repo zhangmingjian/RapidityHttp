@@ -16,14 +16,14 @@ namespace Rapidity.Http.Extensions
         /// <returns></returns>
         public static HttpServiceConfigureItem ForTypes(this HttpServiceConfigureItem serviceConfigure, params Type[] types)
         {
-            var list = serviceConfigure.ForTypes.ToList();
-            list.AddRange(types);
-            serviceConfigure.ForTypes = list;
+            if (types == null || types.Length <= 0) return serviceConfigure;
+            foreach (var type in types)
+                serviceConfigure.ForTypes.Add(type);
             return serviceConfigure;
         }
 
         /// <summary>
-        /// 批量注册 用于整个项目对接一个服务时
+        /// 批量注册 仅用于单个项目对接一个服务时
         /// </summary>
         /// <param name="serviceConfigure"></param>
         /// <param name="assembly"></param>
@@ -31,8 +31,8 @@ namespace Rapidity.Http.Extensions
         public static HttpServiceConfigureItem ForTypes(this HttpServiceConfigureItem serviceConfigure, Assembly assembly)
         {
             if (assembly == null) throw new ArgumentNullException(nameof(assembly));
-            var types = assembly.GetTypes()
-                .Where(type =>typeof(IHttpService).IsAssignableFrom(type) || type.GetCustomAttribute<HttpServiceAttribute>() != null);
+            var types = assembly.GetExportedTypes()
+                .Where(type => typeof(IHttpService).IsAssignableFrom(type) || type.GetCustomAttribute<HttpServiceAttribute>() != null);
             return serviceConfigure.ForTypes(types.ToArray());
         }
 

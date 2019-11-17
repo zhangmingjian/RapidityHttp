@@ -1,11 +1,7 @@
-﻿using Rapidity.Http.DynamicProxies;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
+using Sample.Service;
 using System;
-using System.CodeDom.Compiler;
-using Microsoft.CSharp;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis;
-using System.Reflection;
-using System.IO;
 
 namespace Sample.Http.ConsoleApp
 {
@@ -14,43 +10,16 @@ namespace Sample.Http.ConsoleApp
         static void Main(string[] args)
         {
             Console.WriteLine("started===============");
+            var provider = Startup.ConfigureServices(null);
+            var tokenService = provider.GetService<ITokenService>();
+            var token = tokenService.GetToken("wx431ac6b88d367ede", "7fc5f5411e0127f21ff413c521736044").GetAwaiter().GetResult();
+            Console.WriteLine("access_token:{0}", token.access_token);
+            var userService = provider.GetService<IUserService>();
+            var userList = userService.GetUserList(token.access_token);
+            Console.WriteLine("userList:{0}", JsonConvert.SerializeObject(userList));
 
-            var dotnetCoreDirectory = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
-
-            var compilation = CSharpCompilation.Create("a").WithOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
-                        .AddReferences(MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location))
-                       .AddReferences(MetadataReference.CreateFromFile(typeof(System.Console).GetTypeInfo().Assembly.Location))
-                       //.AddReferences(MetadataReference.CreateFromFile(Path.Combine(dotnetCoreDirectory, "mscorlib.dll")))
-                       //.AddReferences(MetadataReference.CreateFromFile(Path.Combine(dotnetCoreDirectory, "netstandard.dll")))
-                       .AddReferences(MetadataReference.CreateFromFile(Path.Combine(dotnetCoreDirectory, "System.Runtime.dll")))
-                        .AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-        @"
-using System;
-
-public static class C
-{
-    public static string Test(string input)
-    {
-        System.Console.WriteLine(input);
-        return input;
-    }
-}"));
-            Type target = null;
-            using (var ms = new MemoryStream())
-            {
-                var result = compilation.Emit(ms);
-                if (!result.Success)
-                {
-                    var error = result.Diagnostics[0];
-                    Console.WriteLine(error.GetMessage());
-                }
-                else
-                {
-                    var assembly = Assembly.Load(ms.GetBuffer());
-                    target = assembly.GetType("C", true, true);
-                }
-            }
-            var text = target.GetMethod("Test").Invoke(null, new object[] { "felkjlfkewjiawoejf" });
+            var userInfo = userService.GetUserInfo(token.access_token, userList.NextOpenid, "").GetAwaiter().GetResult();
+            Console.WriteLine("userInfo:{0}", JsonConvert.SerializeObject(userInfo));
 
             Console.ReadKey();
         }

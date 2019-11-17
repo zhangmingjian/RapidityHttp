@@ -2,6 +2,7 @@
 using Sample.Service;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -17,7 +18,11 @@ namespace Rapidity.Http.Tests
         public void GeneratorTest()
         {
             var types = new Type[] { typeof(IGenericService<,>), typeof(ITestService), typeof(ITokenService), typeof(IUserService) };
+            var watch = Stopwatch.StartNew();
             var assembly = ProxyGenerator.Generate(types);
+            watch.Stop();
+            
+            Trace.TraceInformation("动态生成用时：{0}ms",watch.ElapsedMilliseconds);
             var generateTypes = assembly.ExportedTypes;
             Assert.Equal(types.Length, generateTypes.Count());
         }

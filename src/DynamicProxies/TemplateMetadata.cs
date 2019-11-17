@@ -11,11 +11,10 @@ namespace Rapidity.Http.DynamicProxies
 {
     /// <summary>
     /// 模板数据
-    /// todo: 1.泛型约束生成 2.泛型方法生成
     /// </summary>
-    internal class TemplateData
+    internal class TemplateMetadata
     {
-        public ICollection<string> UsingList { get; set; } = new Collection<string>();
+        public SortedSet<string> UsingList { get; set; } = new SortedSet<string>();
 
         public ICollection<ClassTemplate> ClassList { get; set; } = new Collection<ClassTemplate>();
     }
@@ -43,7 +42,7 @@ namespace Rapidity.Http.DynamicProxies
         /// <summary>
         /// using语句
         /// </summary>
-        public ICollection<string> UsingList { get; set; } = new Collection<string>();
+        public SortedSet<string> UsingList { get; set; } = new SortedSet<string>();
 
         /// <summary>
         /// 标签列表
@@ -180,9 +179,9 @@ namespace Rapidity.Http.DynamicProxies
         public Type Type { get; }
         public string Name { get; }
 
-        public bool IsIn { get; }
+        //public bool IsIn { get; }
 
-        public bool IsOut { get; }
+        //public bool IsOut { get; }
 
         /// <summary>
         /// 泛型参数
@@ -195,15 +194,15 @@ namespace Rapidity.Http.DynamicProxies
             var typeInfo = type as TypeInfo;
             foreach (var genericType in typeInfo.GenericTypeArguments)
                 GenericArguments.Add(new TypeTemplate(genericType));
-            if (typeInfo.IsGenericParameter)
-            {
-                //协变
-                if (typeInfo.GenericParameterAttributes.HasFlag(GenericParameterAttributes.Covariant))
-                    IsOut = true;
-                //逆变
-                if (typeInfo.GenericParameterAttributes.HasFlag(GenericParameterAttributes.Contravariant))
-                    IsIn = true;
-            }
+            //if (typeInfo.IsGenericParameter)
+            //{
+            //    //协变
+            //    if (typeInfo.GenericParameterAttributes.HasFlag(GenericParameterAttributes.Covariant))
+            //        IsOut = true;
+            //    //逆变
+            //    if (typeInfo.GenericParameterAttributes.HasFlag(GenericParameterAttributes.Contravariant))
+            //        IsIn = true;
+            //}
             var typeNamespace = typeInfo.Namespace;
             var typeName = typeInfo.Name;
 
@@ -217,16 +216,20 @@ namespace Rapidity.Http.DynamicProxies
 
         public override string ToString()
         {
-            if (Type == typeof(void))
-                return "void";
-            var subName = string.Empty;
-            if (GenericArguments != null && GenericArguments.Count > 0)
+            if (this.Type == typeof(void)) return "void";
+            switch (Type.GetTypeCode(this.Type))
             {
-                subName = $"<{string.Join(",", GenericArguments.Select(x => x.ToString()))}>";
+                case TypeCode.Boolean: return "bool";
+                case TypeCode.String: return "string";
+                case TypeCode.Int16: return "short";
+                case TypeCode.Int32: return "int";
+                case TypeCode.Int64: return "long";
             }
-            return $"{Name}{subName}";
+            var name = this.Name;
+            if (GenericArguments.Count > 0)
+                name = $"{name}<{string.Join(",", GenericArguments.Select(x => x.ToString()))}>";
+            return name;
         }
-
     }
 
     /// <summary>
@@ -354,7 +357,7 @@ namespace Rapidity.Http.DynamicProxies
                 return _attributeData.AttributeType.FullName;
             }
         }
-       
+
         public ICollection<string> ConstructorArguments
         {
             get
@@ -363,7 +366,7 @@ namespace Rapidity.Http.DynamicProxies
                 foreach (var arg in _attributeData.ConstructorArguments)
                 {
                     if (arg.Value == null) continue;
-                    switch(Type.GetTypeCode(arg.ArgumentType))
+                    switch (Type.GetTypeCode(arg.ArgumentType))
                     {
                         case TypeCode.String:
                             arguments.Add($"\"{arg.Value}\"");
@@ -390,7 +393,7 @@ namespace Rapidity.Http.DynamicProxies
                 var arguments = new Dictionary<string, string>();
                 foreach (var arg in _attributeData.NamedArguments)
                 {
-                    switch(Type.GetTypeCode(arg.TypedValue.ArgumentType))
+                    switch (Type.GetTypeCode(arg.TypedValue.ArgumentType))
                     {
                         case TypeCode.String:
                             arguments.Add(arg.MemberName, $"\"{arg.TypedValue.Value}\"");
