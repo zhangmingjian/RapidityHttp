@@ -2,11 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl></PackageProjectUrl>
+    <RepositoryUrl>https://github.com/zhangmingjian/RapidityHttp</RepositoryUrl>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageDescription>RapidityHttp is a wrapper for HttpClient, including retry, blowdown, cache, request log, purpose is convenient, fast docking RestApi</PackageDescription>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <DefineConstants>DEBUG,RELEASE</DefineConstants>
+    <WarningLevel>0</WarningLevel>
+    <!--<GenerateAssemblyInfo>false</GenerateAssemblyInfo>-->
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +21,6 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="2.2.0" />
     <PackageReference Include="System.Reflection.Emit" Version="4.6.0" />
     <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.6.0" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="4.5.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
 

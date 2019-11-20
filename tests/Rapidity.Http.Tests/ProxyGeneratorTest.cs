@@ -55,5 +55,13 @@ namespace Rapidity.Http.Tests
             var name = template.ToString();
             Assert.Equal("System.Collections.Generic.IDictionary<System.String,System.Func<System.Object,System.DateTime,System.Boolean,System.Threading.Tasks.Task<System.Guid>>>", name);
         }
+
+        [Fact]
+        public void UriTest()
+        {
+            var uri = "https://www.baidu.com?name=张三&value={fankl}";
+            var ss = Uri.EscapeUriString(uri);
+            var aa = Uri.EscapeDataString(uri);
+        }
     }
 }

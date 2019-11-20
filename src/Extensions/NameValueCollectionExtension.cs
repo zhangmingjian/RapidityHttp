@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.Encodings.Web;
 
 namespace Rapidity.Http.Extensions
 {
@@ -38,9 +37,8 @@ namespace Rapidity.Http.Extensions
                 var value = collection[key];
                 if (!string.IsNullOrEmpty(value))
                 {
-                    value = UrlEncoder.Default.Encode(collection[key]);
                     var delimiter = sb.Length > 0 ? "&" : string.Empty;
-                    sb.AppendFormat($"{delimiter}{key}={value}");
+                    sb.AppendFormat($"{delimiter}{key}={collection[key]}");
                 }
             }
             return sb.ToString();

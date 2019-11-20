@@ -46,6 +46,7 @@ namespace Rapidity.Http
             if (description.UriQuery.Count > 0)
                 tempUri = $"{tempUri}{(tempUri.Contains("?") ? "&" : "?")}{description.UriQuery.ToQueryString()}";
 
+            tempUri = Uri.EscapeUriString(tempUri);
             return new Uri(tempUri, UriKind.RelativeOrAbsolute);
         }
     }

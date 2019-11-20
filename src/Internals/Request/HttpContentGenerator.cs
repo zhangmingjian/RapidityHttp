@@ -4,7 +4,6 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Text;
-using System.Text.Encodings.Web;
 
 namespace Rapidity.Http
 {
@@ -59,7 +58,7 @@ namespace Rapidity.Http
                 return ByteContent(description.Body);
             }
             //MultipartFormDataContent
-                
+
             throw new Exception($"不支持的ContentType{description.ContentType}");
         }
 
@@ -89,12 +88,11 @@ namespace Rapidity.Http
                 var value = item.Value;
                 if (!string.IsNullOrEmpty(value))
                 {
-                    value = UrlEncoder.Default.Encode(value);
                     var delimiter = sb.Length > 0 ? "&" : string.Empty;
                     sb.AppendFormat($"{delimiter}{item.Key}={value}");
                 }
             }
-            var formUrl = sb.ToString();
+            var formUrl = Uri.EscapeUriString(sb.ToString());
             var encoding = Encoding.GetEncoding(encode ?? "utf-8");
             return new StringContent(formUrl, encoding, MimeTypes.Application.XWwwFormUrlencoded);
         }

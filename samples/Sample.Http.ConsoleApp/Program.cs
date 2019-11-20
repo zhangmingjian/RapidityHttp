@@ -18,7 +18,7 @@ namespace Sample.Http.ConsoleApp
             var userList = userService.GetUserList(token.access_token);
             Console.WriteLine("userList:{0}", JsonConvert.SerializeObject(userList));
 
-            var userInfo = userService.GetUserInfo(token.access_token, userList.NextOpenid, "").GetAwaiter().GetResult();
+            var userInfo = userService.GetUserInfo(token.access_token, userList.NextOpenid, "中文").GetAwaiter().GetResult();
             Console.WriteLine("userInfo:{0}", JsonConvert.SerializeObject(userInfo));
 
             Console.ReadKey();
