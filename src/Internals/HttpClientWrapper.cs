@@ -36,24 +36,24 @@ namespace Rapidity.Http
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="description"></param>
+        /// <param name="descriptor"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<ResponseWrapper> SendAndWrapAsync(RequestDescription description, CancellationToken token = default)
+        public async Task<ResponseWrapper> SendAndWrapAsync(RequestDescriptor descriptor, CancellationToken token = default)
         {
-            var requestBuilder = _builderFactory.GetBuilder(description.RequestBuilderType);
-            var request = requestBuilder.GetRequest(description);
+            var requestBuilder = _builderFactory.GetBuilder(descriptor.RequestBuilderType);
+            var request = requestBuilder.GetRequest(descriptor);
 
             var result = new ResponseWrapperResult
             {
                 Request = request
             };
-            var client = _clientFactory.CreateClient(description.ServiceName);
-            var context = new RetryPolicyContext
+            var client = _clientFactory.CreateClient(descriptor.ServiceName);
+            var argument = new RetryPolicyArgument
             {
-                Service = description.ServiceName,
-                Module = description.ModuleName,
-                Option = description.RetryOption,
+                Service = descriptor.ServiceName,
+                Module = descriptor.ModuleName,
+                Option = descriptor.RetryOption,
                 Request = request
             };
             var sending = new Func<HttpRequest, Task<HttpResponse>>(async message =>
@@ -61,11 +61,11 @@ namespace Rapidity.Http
                 var responseMessage = await client.SendAsync(message, token);
                 return new HttpResponse(responseMessage);
             });
-            result = await _retryProcessor.ProcessAsync(context, sending);
+            result = await _retryProcessor.ProcessAsync(argument, sending);
             //调用日志记录器，写缓存（如果符合条件）
             try
             {
-                await _recordStore.WriteAsync(description, result);
+                await _recordStore.WriteAsync(descriptor, result);
             }
             catch (Exception ex)
             {
@@ -83,15 +83,15 @@ namespace Rapidity.Http
         /// 
         /// </summary>
         /// <typeparam name="TOutData"></typeparam>
-        /// <param name="description"></param>
+        /// <param name="descriptor"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public async Task<ResponseWrapper<TOutData>> SendAndWrapAsync<TOutData>(RequestDescription description, CancellationToken token = default)
+        public async Task<ResponseWrapper<TOutData>> SendAndWrapAsync<TOutData>(RequestDescriptor descriptor, CancellationToken token = default)
         {
-            var wrapper = await SendAndWrapAsync(description, token);
+            var wrapper = await SendAndWrapAsync(descriptor, token);
             var response = wrapper.Response;
-            var responseResolver = _resolverFactory.GetResolver(description.ResponseResolverType, response?.Content?.Headers);
-            var outData = await responseResolver.Resolve<TOutData>(response, description.ExtendData);
+            var responseResolver = _resolverFactory.GetResolver(descriptor.ResponseResolverType, response?.Content?.Headers);
+            var outData = await responseResolver.Resolve<TOutData>(response, descriptor.ExtendData);
             return new ResponseWrapper<TOutData>(wrapper)
             {
                 Data = outData

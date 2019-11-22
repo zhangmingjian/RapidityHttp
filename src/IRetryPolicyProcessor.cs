@@ -8,6 +8,6 @@ namespace Rapidity.Http
     /// </summary>
     public interface IRetryPolicyProcessor
     {
-        Task<ResponseWrapperResult> ProcessAsync(RetryPolicyContext context, Func<HttpRequest, Task<HttpResponse>> sending);
+        Task<ResponseWrapperResult> ProcessAsync(RetryPolicyArgument argument, Func<HttpRequest, Task<HttpResponse>> sending);
     }
 }

@@ -6,16 +6,16 @@ using System.Reflection;
 
 namespace Rapidity.Http
 {
-    internal class DefaultRequestDescriptionBuilder : IRequestDescriptionBuilder
+    internal class DefaultRequestDescriptorBuilder : IRequestDescriptorBuilder
     {
         private readonly IHttpServiceConfiguration _config;
 
-        public DefaultRequestDescriptionBuilder(IHttpServiceConfiguration config)
+        public DefaultRequestDescriptorBuilder(IHttpServiceConfiguration config)
         {
             _config = config;
         }
 
-        public RequestDescription Build(MethodInfo method, params object[] arguments)
+        public RequestDescriptor Build(MethodInfo method, params object[] arguments)
         {
             var methodOption = method.GetConfigureItem();
             var moduleOption = method.ReflectedType.GetConfigureItem(methodOption);
@@ -27,7 +27,7 @@ namespace Rapidity.Http
                 throw new Exception($"ServiceName:{moduleOption.Service}或{method.ReflectedType}应至少有一项在配置中");
             var option = moduleOption.Option.Union(configure.GetHttpOption(moduleOption.Module), true);
 
-            var description = new RequestDescription
+            var descriptor = new RequestDescriptor
             {
                 ServiceName = configure.ServiceName,
                 ModuleName = moduleOption.Module ?? method.Name,
@@ -40,18 +40,18 @@ namespace Rapidity.Http
                 RequestBuilderType = option.RequestBuilderType,
                 ResponseResolverType = option.ResponseResolverType
             };
-            description.Headers.Add(option.DefaultHeaders);
-            return Initialize(description, method, arguments);
+            descriptor.Headers.Add(option.DefaultHeaders);
+            return Initialize(descriptor, method, arguments);
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="description"></param>
+        /// <param name="descriptor"></param>
         /// <param name="method"></param>
         /// <param name="arguments"></param>
         /// <returns></returns>
-        private RequestDescription Initialize(RequestDescription description, MethodInfo method, object[] arguments)
+        private RequestDescriptor Initialize(RequestDescriptor descriptor, MethodInfo method, object[] arguments)
         {
             arguments = arguments ?? new object[0];
             var methodParameters = method.GetParameters();
@@ -60,7 +60,7 @@ namespace Rapidity.Http
             //header转换
             var headerAttrOnMethod = method.GetCustomAttributes<HeaderAttribute>();
             foreach (var header in headerAttrOnMethod)
-                description.Headers.Add(header.Name, header.Value);
+                descriptor.Headers.Add(header.Name, header.Value);
             //方法参数转换
             for (int index = 0; index < methodParameters.Length; index++)
             {
@@ -73,40 +73,40 @@ namespace Rapidity.Http
                 {
                     if (!queryAttr.CanNull && parameterValue == null)
                         throw new ArgumentNullException(parameter.Name);
-                    if (parameter.ParameterType.IsSimpleType())
+                    if (parameterValue.GetType().IsSimpleType())
                     {
                         var name = string.IsNullOrEmpty(queryAttr.Name) ? parameter.Name : queryAttr.Name;
-                        description.UriQuery.Add(name, parameterValue?.ToString());
+                        descriptor.UriQuery.Add(name, parameterValue?.ToString());
                     }
                     else
                     {
-                        description.UriQuery.Add(parameterValue.ToNameValueCollection());
+                        descriptor.UriQuery.Add(parameterValue.ToNameValueCollection());
                     }
                 }
                 if (headerAttr != null)
                 {
                     if (!headerAttr.CanNull && parameterValue == null)
                         throw new ArgumentNullException(parameter.Name);
-                    if (parameter.ParameterType.IsSimpleType())
+                    if (parameterValue.GetType().IsSimpleType())
                     {
                         var name = string.IsNullOrEmpty(headerAttr.Name) ? parameter.Name : headerAttr.Name;
-                        description.Headers.Add(name, parameterValue?.ToString());
+                        descriptor.Headers.Add(name, parameterValue?.ToString());
                     }
                     else
                     {
-                        description.Headers.Add(parameterValue.ToNameValueCollection());
+                        descriptor.Headers.Add(parameterValue.ToNameValueCollection());
                     }
                 }
                 if (bodyAttr != null)
                 {
                     if (!bodyAttr.CanNull && parameterValue == null)
                         throw new ArgumentNullException(parameter.Name);
-                    description.Body = parameterValue;
+                    descriptor.Body = parameterValue;
                 }
                 if (queryAttr == null && headerAttr == null && bodyAttr == null)
-                    description.ExtendData.Add(parameter.Name, parameterValue);
+                    descriptor.ExtendData.Add(parameter.Name, parameterValue);
             }
-            return description;
+            return descriptor;
         }
     }
 }

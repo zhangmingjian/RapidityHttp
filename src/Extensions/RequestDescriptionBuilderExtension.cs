@@ -10,7 +10,7 @@ namespace Rapidity.Http.Extensions
     /// </summary>
     public static class RequestDescriptionBuilderExtension
     {
-        public static RequestDescription Build(this IRequestDescriptionBuilder builder, Type entryType, params object[] arguments)
+        public static RequestDescriptor Build(this IRequestDescriptorBuilder builder, Type entryType, params object[] arguments)
         {
             int maxDeep = 10;
             MethodInfo method = null;

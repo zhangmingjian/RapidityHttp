@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Sample.Service;
 using System;
+using System.Collections.Generic;
 
 namespace Sample.Http.ConsoleApp
 {
@@ -9,7 +10,7 @@ namespace Sample.Http.ConsoleApp
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("started===============");
+        Console.WriteLine("started===============");
             var provider = Startup.ConfigureServices(null);
             var tokenService = provider.GetService<ITokenService>();
             var token = tokenService.GetToken("wx431ac6b88d367ede", "7fc5f5411e0127f21ff413c521736044").GetAwaiter().GetResult();
@@ -24,4 +25,5 @@ namespace Sample.Http.ConsoleApp
             Console.ReadKey();
         }
     }
+
 }

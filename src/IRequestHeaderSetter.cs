@@ -7,6 +7,6 @@ namespace Rapidity.Http
     /// </summary>
     public interface IRequestHeaderSetter
     {
-        void SetHeader(RequestDescription description, HttpRequestHeaders header);
+        void SetHeader(RequestDescriptor description, HttpRequestHeaders header);
     }
 }

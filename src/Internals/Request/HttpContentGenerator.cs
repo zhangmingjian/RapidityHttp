@@ -26,7 +26,7 @@ namespace Rapidity.Http
         /// </summary>
         /// <param name="description"></param>
         /// <returns></returns>
-        public HttpContent GetContent(RequestDescription description)
+        public HttpContent GetContent(RequestDescriptor description)
         {
             if (description.Body == null) return null;
 

@@ -42,4 +42,8 @@ namespace Sample.Service
         public string nickname { get; set; }
         public string headimgurl { get; set; }
     }
+
 }
+
+
+

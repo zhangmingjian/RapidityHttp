@@ -23,7 +23,7 @@ namespace Rapidity.Http
         /// </summary>
         /// <param name="description"></param>
         /// <returns></returns>
-        public Uri GetUri(RequestDescription description)
+        public Uri GetUri(RequestDescriptor description)
         {
             var tempUri = description.Uri;
             var template = new StringTemplate(tempUri);

@@ -8,19 +8,19 @@ namespace Rapidity.Http
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="description"></param>
+        /// <param name="descriptor"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        Task<ResponseWrapper> SendAndWrapAsync(RequestDescription description, CancellationToken token = default);
+        Task<ResponseWrapper> SendAndWrapAsync(RequestDescriptor descriptor, CancellationToken token = default);
 
         /// <summary>
         /// 
         /// </summary>
         /// <typeparam name="TOutData"></typeparam>
-        /// <param name="description"></param>
+        /// <param name="descriptor"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        Task<ResponseWrapper<TOutData>> SendAndWrapAsync<TOutData>(RequestDescription description, CancellationToken token = default);
+        Task<ResponseWrapper<TOutData>> SendAndWrapAsync<TOutData>(RequestDescriptor descriptor, CancellationToken token = default);
 
     }
 }

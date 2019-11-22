@@ -37,7 +37,7 @@ namespace Rapidity.Http.DynamicProxies
 
             //定义私有变量
             var clientField = typeBuilder.DefineField("_httpClient", typeof(IHttpClientWrapper), FieldAttributes.Private);
-            var builderField = typeBuilder.DefineField("_descriptionBuilder", typeof(IRequestDescriptionBuilder), FieldAttributes.Private);
+            var builderField = typeBuilder.DefineField("_descriptionBuilder", typeof(IRequestDescriptorBuilder), FieldAttributes.Private);
 
             BuildConstructor(typeBuilder, builderField, clientField);
 
@@ -63,7 +63,7 @@ namespace Rapidity.Http.DynamicProxies
         private void BuildConstructor(TypeBuilder typeBuilder, FieldBuilder builderField, FieldBuilder clientField)
         {
             //构造函数
-            Type[] constructorArgs = { typeof(IRequestDescriptionBuilder), typeof(IHttpClientWrapper) };
+            Type[] constructorArgs = { typeof(IRequestDescriptorBuilder), typeof(IHttpClientWrapper) };
             var constructorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, constructorArgs);
 
             ILGenerator ilOfCtor = constructorBuilder.GetILGenerator();

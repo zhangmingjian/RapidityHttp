@@ -2,8 +2,8 @@
 
 namespace Rapidity.Http
 {
-    public interface IRequestDescriptionBuilder
+    public interface IRequestDescriptorBuilder
     {
-        RequestDescription Build(MethodInfo method, params object[] arguments);
+        RequestDescriptor Build(MethodInfo method, params object[] arguments);
     }
 }

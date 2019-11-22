@@ -34,12 +34,8 @@ namespace Rapidity.Http.Extensions
             StringBuilder sb = new StringBuilder();
             foreach (var key in collection.AllKeys)
             {
-                var value = collection[key];
-                if (!string.IsNullOrEmpty(value))
-                {
-                    var delimiter = sb.Length > 0 ? "&" : string.Empty;
-                    sb.AppendFormat($"{delimiter}{key}={collection[key]}");
-                }
+                var delimiter = sb.Length > 0 ? "&" : string.Empty;
+                sb.AppendFormat($"{delimiter}{key}={collection[key]}");
             }
             return sb.ToString();
         }

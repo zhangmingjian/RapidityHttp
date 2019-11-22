@@ -22,7 +22,7 @@ namespace Rapidity.Http
         /// </summary>
         /// <param name="description"></param>
         /// <returns></returns>
-        public HttpRequest GetRequest(RequestDescription description)
+        public HttpRequest GetRequest(RequestDescriptor description)
         {
             var request = new HttpRequest
             {

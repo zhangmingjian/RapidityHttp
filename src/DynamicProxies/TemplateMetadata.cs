@@ -247,7 +247,9 @@ namespace Rapidity.Http.DynamicProxies
             this.Name = info.Name;
             this.ParameterType = new TypeTemplate(info.ParameterType);
             this.AttributeList = CustomAttributeData.GetCustomAttributes(info)
-                                    .Where(x => x.AttributeType != typeof(OptionalAttribute) && x.AttributeType != typeof(ParamArrayAttribute))
+                                    .Where(x => x.AttributeType != typeof(OptionalAttribute) 
+                                     && x.AttributeType != typeof(ParamArrayAttribute)
+                                     && x.AttributeType != typeof(System.Runtime.CompilerServices.DynamicAttribute))
                                     .Select(x => new CustomAttributeTemplate(x).ToString()).ToList();
         }
 

@@ -7,13 +7,13 @@ namespace Rapidity.Http
     /// </summary>
     public interface IInvokeRecordStore
     {
-        Task WriteAsync(RequestDescription description, ResponseWrapperResult result);
+        Task WriteAsync(RequestDescriptor description, ResponseWrapperResult result);
     }
 
 
     internal class NullInvokeRecordStore : IInvokeRecordStore
     {
-        public async Task WriteAsync(RequestDescription description, ResponseWrapperResult result)
+        public async Task WriteAsync(RequestDescriptor description, ResponseWrapperResult result)
         {
             await Task.CompletedTask;
         }

@@ -12,7 +12,7 @@ namespace Rapidity.Http
     {
         private static object _lock = new object();
 
-        public Task WriteAsync(RequestDescription description, ResponseWrapperResult result)
+        public Task WriteAsync(RequestDescriptor description, ResponseWrapperResult result)
         {
             var sb = new StringBuilder();
             sb.Append(DateTime.Now + ", ");

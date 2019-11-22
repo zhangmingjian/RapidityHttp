@@ -7,6 +7,6 @@ namespace Rapidity.Http
     /// </summary>
     public interface IUriGenerator
     {
-        Uri GetUri(RequestDescription description);
+        Uri GetUri(RequestDescriptor description);
     }
 }

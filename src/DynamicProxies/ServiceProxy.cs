@@ -17,7 +17,7 @@ namespace Rapidity.Http.DynamicProxies
 
         protected virtual object Invoke(MethodInfo targetMethod, object[] args)
         {
-            var builder = _provider.GetService<IRequestDescriptionBuilder>();
+            var builder = _provider.GetService<IRequestDescriptorBuilder>();
             var wrapper = _provider.GetService<IHttpClientWrapper>();
 
             var description = builder.Build(targetMethod, args);
@@ -64,25 +64,25 @@ namespace Rapidity.Http.DynamicProxies
             if (returnType == typeof(ResponseWrapper))
             {
                 return typeof(IHttpClientWrapper).GetMethodInfo(nameof(IHttpClientWrapper.SendAndWrapAsync),
-                    BindingFlags.Public | BindingFlags.Instance, false, 0, typeof(RequestDescription), typeof(CancellationToken));
+                    BindingFlags.Public | BindingFlags.Instance, false, 0, typeof(RequestDescriptor), typeof(CancellationToken));
             }
 
             if (returnType.Namespace == typeof(ResponseWrapper).Namespace && returnType.Name == "ResponseWrapper`1")
             {
                 return typeof(IHttpClientWrapper).GetMethodInfo(nameof(IHttpClientWrapper.SendAndWrapAsync),
-                    BindingFlags.Public | BindingFlags.Instance, true, 1, typeof(RequestDescription), typeof(CancellationToken));
+                    BindingFlags.Public | BindingFlags.Instance, true, 1, typeof(RequestDescriptor), typeof(CancellationToken));
             }
 
             if (returnType == typeof(void))
             {
                 return typeof(HttpClientWrapperExtension).GetMethodInfo(nameof(HttpClientWrapperExtension.SendAsync),
                     BindingFlags.Static | BindingFlags.Public,
-                    false, 0, typeof(IHttpClientWrapper), typeof(RequestDescription), typeof(CancellationToken));
+                    false, 0, typeof(IHttpClientWrapper), typeof(RequestDescriptor), typeof(CancellationToken));
             }
 
             return typeof(HttpClientWrapperExtension).GetMethodInfo(nameof(HttpClientWrapperExtension.SendAsync),
                 BindingFlags.Static | BindingFlags.Public,
-                true, 1, typeof(IHttpClientWrapper), typeof(RequestDescription), typeof(CancellationToken));
+                true, 1, typeof(IHttpClientWrapper), typeof(RequestDescriptor), typeof(CancellationToken));
         }
 
         /// <summary>

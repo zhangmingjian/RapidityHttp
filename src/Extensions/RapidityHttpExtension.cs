@@ -32,7 +32,7 @@ namespace Rapidity.Http.Extensions
                 .AddTransient<IUriGenerator, UriGenerator>()
                 .AddTransient<IRequestHeaderSetter, RequestHeaderSetter>()
                 .AddTransient<IHttpContentGenerator, HttpContentGenerator>()
-                .AddSingleton<IRequestDescriptionBuilder, DefaultRequestDescriptionBuilder>()
+                .AddSingleton<IRequestDescriptorBuilder, DefaultRequestDescriptorBuilder>()
                 .AddTransient<IRetryPolicyProcessor, DefaultRetryPolicyProcessor>()
                 .AddTransient<IInvokeRecordStore, NullInvokeRecordStore>();
             services.AddHttpClient();

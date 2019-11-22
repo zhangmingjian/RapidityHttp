@@ -20,7 +20,7 @@ namespace Rapidity.Http
         /// </summary>
         /// <param name="description"></param>
         /// <param name="header"></param>
-        public void SetHeader(RequestDescription description, HttpRequestHeaders header)
+        public void SetHeader(RequestDescriptor description, HttpRequestHeaders header)
         {
             var headers = description.Headers;
             foreach (var key in headers.AllKeys)

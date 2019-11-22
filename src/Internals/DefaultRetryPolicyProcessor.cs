@@ -24,19 +24,19 @@ namespace Rapidity.Http
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="argument"></param>
         /// <param name="sending"></param>
         /// <returns></returns>
-        public async Task<ResponseWrapperResult> ProcessAsync(RetryPolicyContext context, Func<HttpRequest, Task<HttpResponse>> sending)
+        public async Task<ResponseWrapperResult> ProcessAsync(RetryPolicyArgument argument, Func<HttpRequest, Task<HttpResponse>> sending)
         {
             var records = new List<RequestRecord>();
-            var option = context.Option;
-            await HandleException(context.Request, async () =>
+            var option = argument.Option;
+            await HandleException(argument.Request, async () =>
              {
                  var timeoutToken = (option?.TotalTimeout ?? 0) > 0
                      ? new CancellationTokenSource(TimeSpan.FromMilliseconds(option.TotalTimeout))
                      : new CancellationTokenSource();
-                 return await SendWithRetryAsync(option, context.Request, sending, records, timeoutToken.Token);
+                 return await SendWithRetryAsync(option, argument.Request, sending, records, timeoutToken.Token);
              }, record =>
              {
                  //只有执行超时才会抛ExecutionHttpException，意味着重试结束
@@ -51,9 +51,9 @@ namespace Rapidity.Http
              });
             var result = new ResponseWrapperResult
             {
-                Request = context.Request,
+                Request = argument.Request,
                 Records = records,
-                Duration = GetDuration(context.Request.TimeStamp),
+                Duration = GetDuration(argument.Request.TimeStamp),
                 RetryCount = records.Count() > 1 ? records.Count() - 1 : 0
             };
             //获取有效请求记录
@@ -62,7 +62,7 @@ namespace Rapidity.Http
             if (result.Response != null)
                 result.RawResponse = await result.Response.Content.ReadAsStringAsync();
             result.Exception = validRecord?.Exception;
-            _logger.LogInformation($"请求{context.Request.RequestUri}执行完毕，用时:{result.Duration}ms");
+            _logger.LogInformation($"请求{argument.Request.RequestUri}执行完毕，用时:{result.Duration}ms");
             return result;
         }
 

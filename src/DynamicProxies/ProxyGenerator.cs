@@ -37,6 +37,8 @@ namespace Rapidity.Http.DynamicProxies
                 .AddReferences(MetadataReference.CreateFromFile(Path.Combine(dotnetCoreDirectory, "netstandard.dll")))
                 .AddReferences(MetadataReference.CreateFromFile(Path.Combine(dotnetCoreDirectory, "System.Runtime.dll")))
                 .AddReferences(MetadataReference.CreateFromFile(typeof(object).GetTypeInfo().Assembly.Location))
+                //dynamic类型需要引用 System.Linq.Expressions.dll
+                .AddReferences(MetadataReference.CreateFromFile(typeof(System.Linq.Expressions.Expression).GetTypeInfo().Assembly.Location))
                 .AddReferences(MetadataReference.CreateFromFile(typeof(ProxyGenerator).GetTypeInfo().Assembly.Location))
                 //添加所有types的引用
                 .AddReferences(types.Select(x => MetadataReference.CreateFromFile(x.GetTypeInfo().Assembly.Location)))
@@ -48,7 +50,13 @@ namespace Rapidity.Http.DynamicProxies
                 var result = compilation.Emit(ms);
                 if (!result.Success)
                 {
-                    var errorMsg = result.Diagnostics[0].GetMessage();
+                    StringBuilder sb = new StringBuilder();
+                    foreach (var diag in result.Diagnostics)
+                    {
+                        if (sb.Length > 0) sb.AppendLine();
+                        sb.Append(diag.GetMessage());
+                    }
+                    var errorMsg = sb.ToString();
                     Trace.TraceError(errorMsg);
                     throw new Exception(errorMsg);
                 }
@@ -180,11 +188,11 @@ namespace Rapidity.Http.DynamicProxies
                 indentLevel++;
 
                 //私有字段
-                builder.AppendIndent(indentLevel).Append("private readonly IRequestDescriptionBuilder _builder;").AppendLine();
+                builder.AppendIndent(indentLevel).Append("private readonly IRequestDescriptorBuilder _builder;").AppendLine();
                 builder.AppendIndent(indentLevel).Append("private readonly IHttpClientWrapper _client;").AppendLine();
                 builder.AppendLine();
                 //---构造函数-----
-                builder.AppendIndent(indentLevel).Append("public ").Append(@class.Name).Append("(IRequestDescriptionBuilder builder, IHttpClientWrapper client)")
+                builder.AppendIndent(indentLevel).Append("public ").Append(@class.Name).Append("(IRequestDescriptorBuilder builder, IHttpClientWrapper client)")
                     .AppendLine();
                 builder.AppendIndent(indentLevel).Append('{').AppendLine();
 

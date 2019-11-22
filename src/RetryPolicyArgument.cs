@@ -5,7 +5,7 @@ namespace Rapidity.Http
     /// <summary>
     /// 
     /// </summary>
-    public class RetryPolicyContext
+    public class RetryPolicyArgument
     {
         public string Service { get; set; }
         public string Module { get; set; }

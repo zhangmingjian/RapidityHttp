@@ -2,6 +2,6 @@
 {
     public interface IHttpRequestBuilder
     {
-        HttpRequest GetRequest(RequestDescription description);
+        HttpRequest GetRequest(RequestDescriptor description);
     }
 }

@@ -9,7 +9,7 @@ namespace Rapidity.Http
     /// <summary>
     /// 当前请求参数信息
     /// </summary>
-    public class RequestDescription
+    public class RequestDescriptor
     {
         /// <summary>
         /// 服务名称
