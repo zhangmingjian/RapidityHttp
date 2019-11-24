@@ -7,4 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Rapidity.Http.csproj" />
   </ItemGroup>
+  <!--<ItemGroup>
+    <PackageReference Include="Rapidity.Http" Version="1.0.0-preview2" />
+  </ItemGroup>-->
 </Project>

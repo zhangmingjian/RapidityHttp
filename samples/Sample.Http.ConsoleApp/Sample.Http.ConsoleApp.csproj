@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Rapidity.Http.csproj" />
     <ProjectReference Include="..\Sample.Service\Sample.Service.csproj" />
   </ItemGroup>
   <ItemGroup>
