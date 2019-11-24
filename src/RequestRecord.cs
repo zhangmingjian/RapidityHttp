@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Rapidity.Http
 {
@@ -19,7 +18,9 @@ namespace Rapidity.Http
         public Exception Exception { get; set; }
 
         private bool? _isTimeout;
-
+        /// <summary>
+        /// 请求是否超时
+        /// </summary>
         public bool IsTimeout
         {
             set => _isTimeout = value;
@@ -36,6 +37,16 @@ namespace Rapidity.Http
             }
         }
 
+        /// <summary>
+        /// 是否有异常
+        /// </summary>
         public bool HasException => Exception != null;
+
+        /// <summary>
+        /// 是否成功响应
+        /// </summary>
+        public bool IsSuccessResponse => Response != null
+                                            && Response.StatusCode >= System.Net.HttpStatusCode.OK
+                                            && Response.StatusCode < System.Net.HttpStatusCode.Ambiguous;
     }
 }

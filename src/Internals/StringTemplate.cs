@@ -50,7 +50,6 @@ namespace Rapidity.Http
             var variables = new Collection<string>();
             if (string.IsNullOrWhiteSpace(template))
                 return variables;
-            // ReSharper disable once GenericEnumeratorNotDisposed
             var enumer = template.GetEnumerator();
             StringBuilder sb = new StringBuilder();
             bool flag = false;

@@ -12,6 +12,8 @@ namespace Rapidity.Http.Attributes
     {
         public string Value { get; protected set; }
 
+        public bool CanNull { get; set; }
+
         public HeaderAttribute() { }
 
         /// <summary>
@@ -23,6 +25,8 @@ namespace Rapidity.Http.Attributes
             if (string.IsNullOrEmpty(nameValue))
                 throw new ArgumentNullException(nameof(nameValue));
             var index = nameValue.IndexOf(':');
+            if (index == 0)
+                throw new Exception($"nameValue格式错误，name不能为空");
             if (index == -1)
                 Name = nameValue;
             else
@@ -33,6 +37,6 @@ namespace Rapidity.Http.Attributes
             }
         }
 
-        public bool CanNull { get; set; }
+
     }
 }

@@ -9,6 +9,7 @@ using System.Reflection;
 using Rapidity.Http.DynamicProxies;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Rapidity.Http.Extensions
 {
@@ -22,6 +23,7 @@ namespace Rapidity.Http.Extensions
             services.TryAddTransient<IJsonContentSerializer, NewtonsoftJsonSerializer>();
             services.TryAddTransient<IXmlContentSerializer, XmlContentSerializer>();
             services.TryAddTransient(typeof(Lazy<>));
+            services.AddMemoryCache();
 
             services.AddTransient<IHttpClientWrapper, HttpClientWrapper>()
                 .AddTransient<IRequestBuilderFactory, RequestBuilderFactory>()

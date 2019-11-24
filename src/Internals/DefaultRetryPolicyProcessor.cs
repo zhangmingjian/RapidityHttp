@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using Rapidity.Http.Configurations;
 using System;
 using System.Collections.Generic;
@@ -15,10 +16,12 @@ namespace Rapidity.Http
     internal class DefaultRetryPolicyProcessor : IRetryPolicyProcessor
     {
         private readonly ILogger<DefaultRetryPolicyProcessor> _logger;
+        private readonly IMemoryCache _cache;
 
-        public DefaultRetryPolicyProcessor(ILogger<DefaultRetryPolicyProcessor> logger)
+        public DefaultRetryPolicyProcessor(ILogger<DefaultRetryPolicyProcessor> logger, IMemoryCache cache)
         {
             _logger = logger;
+            _cache = cache;
         }
 
         /// <summary>
@@ -99,7 +102,7 @@ namespace Rapidity.Http
                  return requestRecord;
              });
 
-            if (!CanRetry(option, record, retryCount)) return record;
+            if (record.IsSuccessResponse || !CanRetry(option, record, retryCount)) return record;
             request = request.Clone();
             var waitTime = option.WaitIntervals[retryCount];
             await Waiting(request, waitTime, option.TotalTimeout, timeoutToken);
@@ -137,11 +140,13 @@ namespace Rapidity.Http
         /// <returns></returns>
         private bool CanRetry(RetryOption option, RequestRecord record, int retryCount)
         {
-            if (option == null)
+            if (option == null
+                || option.RetryCount <= 0
+                || retryCount >= option.RetryCount)
                 return false;
 
-            if (retryCount >= option.RetryCount)
-                return false;
+            if (option.CanRetry != null)
+                return option.CanRetry(record);
 
             if ((option.TransientErrorRetry ?? false) && record.Exception != null)
             {
@@ -154,8 +159,7 @@ namespace Rapidity.Http
 
             var statusCode = (int)record.Response.StatusCode;
             var method = record.Response.RequestMessage.Method.ToString();
-            if (option.RetryCount > 0
-                && (option.RetryStatusCodes?.Contains(statusCode) ?? false)
+            if (option.RetryStatusCodes?.Contains(statusCode) ?? false
                 && (option.RetryMethods?.Contains(method, StringComparer.CurrentCultureIgnoreCase) ?? false))
                 return true;
             return false;

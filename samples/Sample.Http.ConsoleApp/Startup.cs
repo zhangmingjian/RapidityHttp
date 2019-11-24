@@ -16,7 +16,9 @@ namespace Sample.Http.ConsoleApp
                 config.BaseAddress = "https://api.weixin.qq.com/";
                 config.Timeout = 60;
                 config.Option.ContentType = MimeTypes.Application.Json;
-            }).ForTypes(typeof(ITokenService),typeof(IUserService));
+
+                config.Option.RetryOption = new Rapidity.Http.Configurations.RetryOption { TransientErrorRetry = false };
+            }).ForTypes(typeof(ITokenService), typeof(IUserService));
             services.ConfigDefaultRecordStore().BuildProxy();
 
             return services.BuildServiceProvider();

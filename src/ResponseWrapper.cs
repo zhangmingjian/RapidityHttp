@@ -36,6 +36,11 @@ namespace Rapidity.Http
         /// 执行时间 ms
         /// </summary>
         public long Duration { get; set; }
+
+        /// <summary>
+        /// 触发熔断
+        /// </summary>
+        public bool Fused { get; set; }
     }
 
     /// <summary>

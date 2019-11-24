@@ -11,7 +11,6 @@ namespace Sample.Service
     /// </summary>
     [HttpService(Service = "wechat", ContentType = "application/json", Encoding = "utf-8")]
     [Cache(true)]
-    [Header("heefe:afefef")]
     public interface ITokenService : IHttpService
     {
         [Get("/cgi-bin/token")]
@@ -21,7 +20,7 @@ namespace Sample.Service
         Task<ResponseWrapper<IpList>> GetIpListAsync([Query] string token, CancellationToken canToken = default(CancellationToken));
 
         [Post("/cgi-bin/message/template/send?access_token={token}")]
-        [Header("header:12121212")]
+        [Header("action:SendTemplateMsg")]
         ResponseWrapper SendTemplateMsg(string token, [Body(CanNull = false)] MessageTemplate template);
     }
 

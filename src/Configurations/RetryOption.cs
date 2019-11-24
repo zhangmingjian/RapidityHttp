@@ -1,4 +1,6 @@
-﻿namespace Rapidity.Http.Configurations
+﻿using System;
+
+namespace Rapidity.Http.Configurations
 {
     /// <summary>
     /// 重试配置
@@ -33,7 +35,27 @@
         /// <summary>
         /// 总超时时间(ms)
         /// </summary>
-        public int TotalTimeout { get; set; } = 60000;
+        public int TotalTimeout { get; set; } = 30000;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Func<RequestRecord, bool> CanRetry { get; set; }
+
+        /// <summary>
+        /// 是否开启熔断
+        /// </summary>
+        public bool FuseEnabled => FuseEnabledWhenFailedCount > 0;
+
+        /// <summary>
+        /// 当失败次数达到多少次时启用熔断
+        /// </summary>
+        public int FuseEnabledWhenFailedCount { get; set; } = 3;
+
+        /// <summary>
+        /// 熔断时间
+        /// </summary>
+        public int FuseDuration { get; set; } = 60000;
 
         /// <summary>
         /// 
@@ -50,6 +72,9 @@
                 TotalTimeout = this.TotalTimeout,
                 TransientErrorRetry = this.TransientErrorRetry,
                 RetryMethods = this.RetryMethods,
+                CanRetry = this.CanRetry,
+                FuseEnabledWhenFailedCount = this.FuseEnabledWhenFailedCount,
+                FuseDuration = this.FuseDuration,
             };
             if (option.WaitIntervals == null || option.WaitIntervals.Length <= 0)
                 option.WaitIntervals = other.WaitIntervals;
@@ -61,6 +86,12 @@
                 option.TotalTimeout = other.TotalTimeout;
             if (option.RetryMethods == null || option.RetryMethods.Length <= 0)
                 option.RetryMethods = other.RetryMethods;
+            if (option.CanRetry == null)
+                option.CanRetry = other.CanRetry;
+            if (option.FuseEnabledWhenFailedCount <= 0)
+                option.FuseEnabledWhenFailedCount = other.FuseEnabledWhenFailedCount;
+            if (option.FuseDuration <= 0)
+                option.FuseDuration = other.FuseDuration;
             return other;
         }
     }

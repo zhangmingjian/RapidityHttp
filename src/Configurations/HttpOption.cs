@@ -54,6 +54,13 @@ namespace Rapidity.Http.Configurations
         public Type ResponseResolverType { get; set; }
 
         /// <summary>
+        /// 是否为成功响应
+        /// </summary>
+        public Func<HttpResponse, bool> IsSuccessResponse { get; set; } = response => response != null
+                                                                                     && response.StatusCode >= System.Net.HttpStatusCode.OK
+                                                                                     && response.StatusCode < System.Net.HttpStatusCode.Ambiguous;
+
+        /// <summary>
         /// 两个配置项做交集，根据优先级
         /// </summary>
         /// <param name="other"></param>
@@ -69,6 +76,7 @@ namespace Rapidity.Http.Configurations
                 Encoding = this.Encoding,
                 RequestBuilderType = this.RequestBuilderType,
                 ResponseResolverType = this.ResponseResolverType,
+                IsSuccessResponse = this.IsSuccessResponse,
                 CacheOption = this.CacheOption?.Union(other.CacheOption) ?? other.CacheOption,
                 RetryOption = this.RetryOption?.Union(other.RetryOption) ?? other.RetryOption
             };
@@ -84,6 +92,7 @@ namespace Rapidity.Http.Configurations
             if (option.Method == default) option.Method = other.Method;
             if (option.RequestBuilderType == null) option.RequestBuilderType = other.RequestBuilderType;
             if (option.ResponseResolverType == null) option.ResponseResolverType = other.ResponseResolverType;
+            if (option.IsSuccessResponse == null) option.IsSuccessResponse = other.IsSuccessResponse;
             return option;
         }
     }

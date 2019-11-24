@@ -29,16 +29,14 @@ namespace Rapidity.Http
 
         public HttpResponse(HttpResponseMessage response)
         {
+            this.ResponseTimeStamp = DateTime.Now.Ticks;
             this.Content = response.Content;
             this.RequestMessage = response.RequestMessage;
             this.ReasonPhrase = response.ReasonPhrase;
             this.StatusCode = response.StatusCode;
             this.Version = response.Version;
             foreach (var header in response.Headers)
-            {
                 this.Headers.TryAddWithoutValidation(header.Key, header.Value);
-            }
-            ResponseTimeStamp = DateTime.Now.Ticks;
         }
     }
 }
