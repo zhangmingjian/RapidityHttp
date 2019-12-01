@@ -22,33 +22,14 @@ namespace Rapidity.Http
         public string ModuleName { get; set; }
 
         /// <summary>
-        /// 请求路径
-        /// </summary>
-        public string Uri { get; set; }
-        /// <summary>
-        /// 请求方法
-        /// </summary>
-        public HttpMethod Method { get; set; }
-
-        /// <summary>
-        /// ContentType
-        /// </summary>
-        public string ContentType { get; set; }
-
-        /// <summary>
-        /// 编码方式
-        /// </summary>
-        public string Encoding { get; set; }
-
-        /// <summary>
         /// url查询参数
         /// </summary>
         public NameValueCollection UriQuery { get; } = new NameValueCollection();
 
-        /// <summary>
-        ///  请求headers
-        /// </summary>
-        public NameValueCollection Headers { get; } = new NameValueCollection();
+        ///// <summary>
+        /////  请求headers
+        ///// </summary>
+        public NameValueCollection Headers => HttpOption.DefaultHeaders;
 
         /// <summary>
         /// 报文体数据
@@ -56,24 +37,9 @@ namespace Rapidity.Http
         public object Body { get; set; }
 
         /// <summary>
-        /// 缓存配置
+        /// 
         /// </summary>
-        public CacheOption CacheOption { get; set; }
-
-        /// <summary>
-        /// 重试配置
-        /// </summary>
-        public RetryOption RetryOption { get; set; }
-
-        /// <summary>
-        /// 请求构造器类型
-        /// </summary>
-        public Type RequestBuilderType { get; set; }
-
-        /// <summary>
-        /// 响应解析器类型
-        /// </summary>
-        public Type ResponseResolverType { get; set; }
+        public HttpOption HttpOption { get; set; } = new HttpOption();
 
         /// <summary>
         /// 扩展数据

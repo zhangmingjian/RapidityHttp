@@ -31,35 +31,35 @@ namespace Rapidity.Http
             if (description.Body == null) return null;
 
             //如果未设置contentType则按stringcontent发送
-            if (string.IsNullOrEmpty(description.ContentType))
+            if (string.IsNullOrEmpty(description.HttpOption.ContentType))
             {
-                var encoding = Encoding.GetEncoding(description.Encoding ?? "utf-8");
+                var encoding = Encoding.GetEncoding(description.HttpOption.Encoding ?? "utf-8");
                 return new StringContent(description.Body.ToString(), encoding, MimeTypes.Text.Plain);
             }
 
-            if (description.ContentType.Equals(MimeTypes.Application.Json,
+            if (description.HttpOption.ContentType.Equals(MimeTypes.Application.Json,
                 StringComparison.CurrentCultureIgnoreCase))
             {
-                return JsonContent(description.Body, description.Encoding);
+                return JsonContent(description.Body, description.HttpOption.Encoding);
             }
-            if (description.ContentType.Equals(MimeTypes.Application.Xml,
+            if (description.HttpOption.ContentType.Equals(MimeTypes.Application.Xml,
                 StringComparison.CurrentCultureIgnoreCase))
             {
-                return XmlContent(description.Body, description.Encoding);
+                return XmlContent(description.Body, description.HttpOption.Encoding);
             }
-            if (description.ContentType.Equals(MimeTypes.Application.XWwwFormUrlencoded,
+            if (description.HttpOption.ContentType.Equals(MimeTypes.Application.XWwwFormUrlencoded,
                 StringComparison.CurrentCultureIgnoreCase))
             {
-                return FormUrlContent(description.Body, description.Encoding);
+                return FormUrlContent(description.Body, description.HttpOption.Encoding);
             }
-            if (description.ContentType.Equals(MimeTypes.Application.OctetStream,
+            if (description.HttpOption.ContentType.Equals(MimeTypes.Application.OctetStream,
                 StringComparison.CurrentCultureIgnoreCase))
             {
                 return ByteContent(description.Body);
             }
             //MultipartFormDataContent
 
-            throw new Exception($"不支持的ContentType{description.ContentType}");
+            throw new Exception($"不支持的ContentType{description.HttpOption.ContentType}");
         }
 
         public HttpContent JsonContent(object body, string encode)

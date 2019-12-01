@@ -53,7 +53,7 @@ namespace Rapidity.Http.Configurations
         public int FuseEnabledWhenFailedCount { get; set; } = 3;
 
         /// <summary>
-        /// 熔断时间
+        /// 熔断时间 ms
         /// </summary>
         public int FuseDuration { get; set; } = 60000;
 

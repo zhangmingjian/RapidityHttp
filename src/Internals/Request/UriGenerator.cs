@@ -25,7 +25,7 @@ namespace Rapidity.Http
         /// <returns></returns>
         public Uri GetUri(RequestDescriptor description)
         {
-            var tempUri = description.Uri;
+            var tempUri = description.HttpOption.Uri;
             var template = new StringTemplate(tempUri);
             if (template.HaveVariable) //使用query替换变量
             {

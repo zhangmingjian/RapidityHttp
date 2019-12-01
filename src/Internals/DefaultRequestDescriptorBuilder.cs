@@ -31,16 +31,8 @@ namespace Rapidity.Http
             {
                 ServiceName = configure.ServiceName,
                 ModuleName = moduleOption.Module ?? method.Name,
-                Uri = option.Uri,
-                Method = option.Method,
-                Encoding = option.Encoding,
-                ContentType = option.ContentType,
-                CacheOption = option.CacheOption,
-                RetryOption = option.RetryOption,
-                RequestBuilderType = option.RequestBuilderType,
-                ResponseResolverType = option.ResponseResolverType
+                HttpOption = option
             };
-            descriptor.Headers.Add(option.DefaultHeaders);
             return Initialize(descriptor, method, arguments);
         }
 

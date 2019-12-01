@@ -26,7 +26,7 @@ namespace Rapidity.Http
         {
             var request = new HttpRequest
             {
-                Method = description.Method ?? HttpMethod.Post,
+                Method = description.HttpOption.Method ?? HttpMethod.Post,
                 Content = _contentGenerator.GetContent(description)
             };
             _headerSetter.SetHeader(description, request.Headers);

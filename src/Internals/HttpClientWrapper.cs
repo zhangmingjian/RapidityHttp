@@ -41,7 +41,7 @@ namespace Rapidity.Http
         /// <returns></returns>
         public async Task<ResponseWrapper> SendAndWrapAsync(RequestDescriptor descriptor, CancellationToken token = default)
         {
-            var requestBuilder = _builderFactory.GetBuilder(descriptor.RequestBuilderType);
+            var requestBuilder = _builderFactory.GetBuilder(descriptor.HttpOption.RequestBuilderType);
             var request = requestBuilder.GetRequest(descriptor);
 
             var result = new ResponseWrapperResult
@@ -53,15 +53,16 @@ namespace Rapidity.Http
             {
                 Service = descriptor.ServiceName,
                 Module = descriptor.ModuleName,
-                Option = descriptor.RetryOption,
-                Request = request
+                Option = descriptor.HttpOption.RetryOption,
+                Request = request,
+                IsSuccessResponse = descriptor.HttpOption.IsSuccessResponse,
+                Sending = async message =>
+                {
+                    var responseMessage = await client.SendAsync(message, token);
+                    return new HttpResponse(responseMessage);
+                }
             };
-            var sending = new Func<HttpRequest, Task<HttpResponse>>(async message =>
-            {
-                var responseMessage = await client.SendAsync(message, token);
-                return new HttpResponse(responseMessage);
-            });
-            result = await _retryProcessor.ProcessAsync(argument, sending);
+            result = await _retryProcessor.ProcessAsync(argument);
             //调用日志记录器，写缓存（如果符合条件）
             try
             {
@@ -90,7 +91,7 @@ namespace Rapidity.Http
         {
             var wrapper = await SendAndWrapAsync(descriptor, token);
             var response = wrapper.Response;
-            var responseResolver = _resolverFactory.GetResolver(descriptor.ResponseResolverType, response?.Content?.Headers);
+            var responseResolver = _resolverFactory.GetResolver(descriptor.HttpOption.ResponseResolverType, response?.Content?.Headers);
             var outData = await responseResolver.Resolve<TOutData>(response, descriptor.ExtendData);
             return new ResponseWrapper<TOutData>(wrapper)
             {

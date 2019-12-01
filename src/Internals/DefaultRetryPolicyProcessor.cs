@@ -28,10 +28,12 @@ namespace Rapidity.Http
         /// 
         /// </summary>
         /// <param name="argument"></param>
-        /// <param name="sending"></param>
         /// <returns></returns>
-        public async Task<ResponseWrapperResult> ProcessAsync(RetryPolicyArgument argument, Func<HttpRequest, Task<HttpResponse>> sending)
+        public async Task<ResponseWrapperResult> ProcessAsync(RetryPolicyArgument argument)
         {
+            var fusedResult = TryGetFuseResult(argument.Service, argument.Module);
+            if (fusedResult != null) return fusedResult;
+
             var records = new List<RequestRecord>();
             var option = argument.Option;
             await HandleException(argument.Request, async () =>
@@ -39,7 +41,7 @@ namespace Rapidity.Http
                  var timeoutToken = (option?.TotalTimeout ?? 0) > 0
                      ? new CancellationTokenSource(TimeSpan.FromMilliseconds(option.TotalTimeout))
                      : new CancellationTokenSource();
-                 return await SendWithRetryAsync(option, argument.Request, sending, records, timeoutToken.Token);
+                 return await SendWithRetryAsync(option, argument.Request, argument.Sending, records, timeoutToken.Token);
              }, record =>
              {
                  //只有执行超时才会抛ExecutionHttpException，意味着重试结束
@@ -60,13 +62,47 @@ namespace Rapidity.Http
                 RetryCount = records.Count() > 1 ? records.Count() - 1 : 0
             };
             //获取有效请求记录
-            var validRecord = result.Records.LastOrDefault(x => x.Response != null) ?? result.Records.LastOrDefault();
-            result.Response = validRecord?.Response;
+            RequestRecord vaildRecord = result.Records.LastOrDefault(x => x.Response != null)
+                                            ?? result.Records.LastOrDefault();
+            result.Response = vaildRecord?.Response;
             if (result.Response != null)
                 result.RawResponse = await result.Response.Content.ReadAsStringAsync();
-            result.Exception = validRecord?.Exception;
+            result.Exception = vaildRecord?.Exception;
             _logger.LogInformation($"请求{argument.Request.RequestUri}执行完毕，用时:{result.Duration}ms");
+            SetFunseResult(argument, result);
             return result;
+        }
+
+        private ResponseWrapperResult TryGetFuseResult(string service, string module)
+        {
+            var key = $"{service}.{module}";
+
+            if (_cache.TryGetValue<FuseEntry>(key, out FuseEntry entry))
+            {
+                if (entry.Result != null)
+                    return entry.Result;
+            }
+            return null;
+        }
+
+        public void SetFunseResult(RetryPolicyArgument argument, ResponseWrapperResult result)
+        {
+            if (argument.Option == null || !argument.Option.FuseEnabled || argument.IsSuccessResponse(result.Response)) 
+                return;
+
+            var key = $"{argument.Service}.{argument.Module}";
+            FuseEntry entry = default;
+            if (_cache.TryGetValue<FuseEntry>(key, out entry))
+            {
+                if (entry.FailedCount >= argument.Option.FuseEnabledWhenFailedCount - 1)
+                {
+                    entry.Result = result;
+                    entry.Result.Fused = true;
+                }
+            }
+            else entry = new FuseEntry();
+            entry.FailedCount++;
+            _cache.Set<FuseEntry>(key, entry, TimeSpan.FromMilliseconds(argument.Option.FuseDuration));
         }
 
         /// <summary>
@@ -102,10 +138,10 @@ namespace Rapidity.Http
                  return requestRecord;
              });
 
-            if (record.IsSuccessResponse || !CanRetry(option, record, retryCount)) return record;
-            request = request.Clone();
+            if (!CanRetry(option, record, retryCount)) return record;
             var waitTime = option.WaitIntervals[retryCount];
             await Waiting(request, waitTime, option.TotalTimeout, timeoutToken);
+            request = request.Clone();
             return await SendWithRetryAsync(option, request, sending, records, timeoutToken, ++retryCount);
         }
 
@@ -174,7 +210,7 @@ namespace Rapidity.Http
         /// <returns></returns>
         private async Task<RequestRecord> HandleException(HttpRequest request, Func<Task<RequestRecord>> running, Func<RequestRecord, RequestRecord> callback)
         {
-            RequestRecord record = null;
+            RequestRecord record = default;
             try
             {
                 record = await running();
