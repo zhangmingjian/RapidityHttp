@@ -13,7 +13,7 @@ namespace Rapidity.Http
         /// <summary>
         /// RequestHashValue
         /// </summary>
-        public string RequestHashValue => base.RequestMessage?.Properties.ValueOrDefault(ConstantValue.RequestHashCode) as string;
+        public string RequestHashValue => base.RequestMessage?.Properties.ValueOrDefault(ConstantValue.RequestHashValue) as string ?? RequestId;
         /// <summary>
         /// 请求开始时间
         /// </summary>

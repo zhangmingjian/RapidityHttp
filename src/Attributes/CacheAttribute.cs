@@ -23,12 +23,12 @@ namespace Rapidity.Http.Attributes
         /// 
         /// </summary>
         /// <param name="enabled"></param>
-        /// <param name="expireIn">过期时间（ms）</param>
-        public CacheAttribute(bool enabled, int expireIn) : this(enabled)
+        /// <param name="expireInSenonds">过期时间（ms）</param>
+        public CacheAttribute(bool enabled, int expireInSenonds) : this(enabled)
         {
-            if (expireIn > 0)
+            if (expireInSenonds > 0)
             {
-                this.ExpireIn = TimeSpan.FromMilliseconds(expireIn);
+                this.ExpireIn = TimeSpan.FromSeconds(expireInSenonds);
             }
         }
     }

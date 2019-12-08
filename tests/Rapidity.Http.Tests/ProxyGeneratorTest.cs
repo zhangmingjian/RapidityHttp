@@ -21,8 +21,8 @@ namespace Rapidity.Http.Tests
             var watch = Stopwatch.StartNew();
             var assembly = ProxyGenerator.Generate(types);
             watch.Stop();
-            
-            Trace.TraceInformation("动态生成用时：{0}ms",watch.ElapsedMilliseconds);
+
+            Trace.TraceInformation("动态生成用时：{0}ms", watch.ElapsedMilliseconds);
             var generateTypes = assembly.ExportedTypes;
             Assert.Equal(types.Length, generateTypes.Count());
         }

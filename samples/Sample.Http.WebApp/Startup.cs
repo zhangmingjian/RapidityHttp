@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Rapidity.Http;
 using Rapidity.Http.Extensions;
 using Sample.Service;
+using System;
 
 namespace Sample.Http.WebApp
 {
@@ -27,6 +28,15 @@ namespace Sample.Http.WebApp
                 config.Timeout = 60;
                 config.Option.ContentType = "application/json";
                 config.Option.DefaultHeaders.Add("customHeader", "fromtest");
+                config.AddModule("GetUserList", httpOption =>
+                {
+                    httpOption.CacheOption = new Rapidity.Http.Configurations.CacheOption
+                    {
+                        Enabled = true,
+                        ExpireIn = TimeSpan.FromSeconds(10),
+                        ExpireType = Rapidity.Http.Configurations.ExpireType.Sliding
+                    };
+                });
             }).For<ITokenService>().For<IUserService>();
             services.ConfigDefaultRecordStore().BuildProxy();
 

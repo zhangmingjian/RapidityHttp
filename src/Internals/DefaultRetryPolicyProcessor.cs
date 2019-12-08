@@ -65,8 +65,6 @@ namespace Rapidity.Http
             RequestRecord vaildRecord = result.Records.LastOrDefault(x => x.Response != null)
                                             ?? result.Records.LastOrDefault();
             result.Response = vaildRecord?.Response;
-            if (result.Response != null)
-                result.RawResponse = await result.Response.Content.ReadAsStringAsync();
             result.Exception = vaildRecord?.Exception;
             _logger.LogInformation($"请求{argument.Request.RequestUri}执行完毕，用时:{result.Duration}ms");
             SetFunseResult(argument, result);

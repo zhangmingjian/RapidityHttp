@@ -31,7 +31,7 @@ namespace Rapidity.Http.Extensions
             if (httpAttr != null)
             {
                 namedOption.Service = httpAttr.Service;
-                namedOption.Module = httpAttr.Module;
+                namedOption.Module = httpAttr.Module ?? method.Name;
                 namedOption.Option.Uri = httpAttr.Uri;
                 namedOption.Option.Method = httpAttr.HttpMethod;
                 namedOption.Option.Encoding = httpAttr.Encoding;
@@ -53,7 +53,7 @@ namespace Rapidity.Http.Extensions
             var httpAttr = type.GetCustomAttribute<HttpServiceAttribute>(false);
             var cacheAttr = type.GetCustomAttribute<CacheAttribute>(false);
             var retryAttr = type.GetCustomAttribute<RetryAttribute>(false);
-          
+
             var namedOption = new NamedHttpOption
             {
                 Option = new HttpOption
@@ -80,10 +80,10 @@ namespace Rapidity.Http.Extensions
 
             if (onMethodConfig != null)
             {
-                if (string.IsNullOrEmpty(onMethodConfig.Service))
-                    onMethodConfig.Service = namedOption.Service;
-                if (string.IsNullOrEmpty(onMethodConfig.Module))
-                    onMethodConfig.Module = namedOption.Module;
+                if (!string.IsNullOrEmpty(onMethodConfig.Service))
+                    namedOption.Service = onMethodConfig.Service;
+                if (!string.IsNullOrEmpty(onMethodConfig.Module))
+                    namedOption.Module = onMethodConfig.Module;
                 namedOption.Option = onMethodConfig.Option.Union(namedOption.Option);
             }
             return namedOption;

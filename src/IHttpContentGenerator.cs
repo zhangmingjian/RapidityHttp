@@ -7,6 +7,6 @@ namespace Rapidity.Http
     /// </summary>
     public interface IHttpContentGenerator
     {
-        HttpContent GetContent(RequestDescriptor description);
+        HttpContent GetContent(RequestDescriptor descriptor);
     }
 }

@@ -17,13 +17,15 @@ namespace Rapidity.Http
         private readonly ILogger<HttpClientWrapper> _logger;
         private readonly IRetryPolicyProcessor _retryProcessor;
         private readonly IInvokeRecordStore _recordStore;
+        private readonly ICacheOperator _cacheOperator;
 
         public HttpClientWrapper(IHttpClientFactory clientFactory,
             IRequestBuilderFactory builderFactory,
             IResponseResolverFactory resolverFactory,
             ILogger<HttpClientWrapper> logger,
             IRetryPolicyProcessor retryProcessor,
-            IInvokeRecordStore recordStore)
+            IInvokeRecordStore recordStore,
+            ICacheOperator cacheOperator)
         {
             _clientFactory = clientFactory;
             _builderFactory = builderFactory;
@@ -31,6 +33,7 @@ namespace Rapidity.Http
             _logger = logger;
             _retryProcessor = retryProcessor;
             _recordStore = recordStore;
+            _cacheOperator = cacheOperator;
         }
 
         /// <summary>
@@ -44,25 +47,26 @@ namespace Rapidity.Http
             var requestBuilder = _builderFactory.GetBuilder(descriptor.HttpOption.RequestBuilderType);
             var request = requestBuilder.GetRequest(descriptor);
 
-            var result = new ResponseWrapperResult
+            var result = _cacheOperator.Read(request);
+            if (!result.HasHitCache)
             {
-                Request = request
-            };
-            var client = _clientFactory.CreateClient(descriptor.ServiceName);
-            var argument = new RetryPolicyArgument
-            {
-                Service = descriptor.ServiceName,
-                Module = descriptor.ModuleName,
-                Option = descriptor.HttpOption.RetryOption,
-                Request = request,
-                IsSuccessResponse = descriptor.HttpOption.IsSuccessResponse,
-                Sending = async message =>
+                var argument = new RetryPolicyArgument
                 {
-                    var responseMessage = await client.SendAsync(message, token);
-                    return new HttpResponse(responseMessage);
-                }
-            };
-            result = await _retryProcessor.ProcessAsync(argument);
+                    Service = descriptor.ServiceName,
+                    Module = descriptor.ModuleName,
+                    Option = descriptor.HttpOption.RetryOption,
+                    Request = request,
+                    IsSuccessResponse = descriptor.HttpOption.IsSuccessResponse,
+                    Sending = async message =>
+                    {
+                        var client = _clientFactory.CreateClient(descriptor.ServiceName);
+                        var responseMessage = await client.SendAsync(message, token);
+                        return new HttpResponse(responseMessage);
+                    }
+                };
+                result = await _retryProcessor.ProcessAsync(argument);
+                _cacheOperator.Write(result.Response, descriptor.HttpOption.CacheOption);
+            }
             //调用日志记录器，写缓存（如果符合条件）
             try
             {
@@ -74,8 +78,7 @@ namespace Rapidity.Http
             }
 
             if (result.Exception != null)
-                throw result.Exception;
-
+                throw result.Exception;          
             return result;
         }
 

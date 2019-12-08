@@ -24,11 +24,18 @@ namespace Rapidity.Http.DynamicProxies
         /// </summary>
         /// <param name="types"></param>
         /// <returns></returns>
-        internal static Assembly Generate(Type[] types)
+        internal static Assembly Generate(Type[] types, CodeGeneratorOptions option = null)
         {
             var template = BuildTemplate(types);
             var source = GenerateCode(template);
-
+            option = option ?? CodeGeneratorOptions.Default;
+            if (option.SaveCode)
+            {
+                if (!Directory.Exists(option.BaseDirectory))
+                    Directory.CreateDirectory(option.BaseDirectory);
+                var path = Path.Combine(option.BaseDirectory, "GeneratedCode.cs");
+                File.WriteAllText(path, source);
+            }
             //获取dotnetCore运行环境目录
             var dotnetCoreDirectory = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
             var compilation = CSharpCompilation.Create("DynamicGenerated")
@@ -65,7 +72,7 @@ namespace Rapidity.Http.DynamicProxies
         }
 
         /// <summary>
-        /// 生成代码模板数据
+        /// 模板数据生成
         /// </summary>
         /// <param name="types"></param>
         /// <returns></returns>
@@ -142,7 +149,7 @@ namespace Rapidity.Http.DynamicProxies
         }
 
         /// <summary>
-        /// 生成代码
+        /// 组装代码
         /// </summary>
         /// <param name="template"></param>
         /// <returns></returns>
@@ -267,11 +274,6 @@ namespace Rapidity.Http.DynamicProxies
                 //--命名空间结束--
             }
             var code = builder.ToString();
-
-#if DEBUG
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "GeneratedCode.cs");
-            File.WriteAllText(path, code);
-#endif
             return code;
         }
 
@@ -334,6 +336,11 @@ namespace Rapidity.Http.DynamicProxies
             return $"return _client.SendAsync<{new TypeTemplate(returnType)}>(request,{tokenName}).GetAwaiter().GetResult();";
         }
 
+        /// <summary>
+        /// 随机名称
+        /// </summary>
+        /// <param name="length"></param>
+        /// <returns></returns>
         private static string RandomName(int length = 16)
         {
             var source = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -363,6 +370,31 @@ namespace Rapidity.Http.DynamicProxies
             for (int i = 0; i < level; i++)
                 builder.Append("\t");
             return builder;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class CodeGeneratorOptions
+    {
+        public bool SaveCode { get; set; }
+
+        public string BaseDirectory { get; set; }
+
+        public static CodeGeneratorOptions Default
+        {
+            get
+            {
+                var option = new CodeGeneratorOptions
+                {
+                    BaseDirectory = AppDomain.CurrentDomain.BaseDirectory
+                };
+#if DEBUG
+                option.SaveCode = true;
+#endif
+                return option;
+            }
         }
     }
 }

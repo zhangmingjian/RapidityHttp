@@ -31,11 +31,10 @@ namespace Rapidity.Http.Extensions
                 .AddTransient<DefaultHttpRequestBuilder>()
                 .AddTransient<JsonResponseResolver>()
                 .AddTransient<XmlResponseResolver>()
-                .AddTransient<IUriGenerator, UriGenerator>()
-                .AddTransient<IRequestHeaderSetter, RequestHeaderSetter>()
                 .AddTransient<IHttpContentGenerator, HttpContentGenerator>()
                 .AddSingleton<IRequestDescriptorBuilder, DefaultRequestDescriptorBuilder>()
                 .AddTransient<IRetryPolicyProcessor, DefaultRetryPolicyProcessor>()
+                .AddTransient<ICacheOperator, DefaultCacheOperator>()
                 .AddTransient<IInvokeRecordStore, NullInvokeRecordStore>();
             services.AddHttpClient();
             return services;
@@ -124,7 +123,7 @@ namespace Rapidity.Http.Extensions
         /// </summary>
         /// <param name="services"></param>
         /// <returns></returns>
-        public static IServiceCollection BuildProxy(this IServiceCollection services)
+        public static IServiceCollection BuildProxy(this IServiceCollection services, CodeGeneratorOptions option = null)
         {
             var configuration = services.ServiceConfigure();
             var types = new Collection<Type>();
@@ -140,7 +139,7 @@ namespace Rapidity.Http.Extensions
                     }
                 }
             }
-            var assembly = ProxyGenerator.Generate(types.ToArray());
+            var assembly = ProxyGenerator.Generate(types.ToArray(), option);
             foreach (var type in types)
             {
                 var proxyType = assembly.ExportedTypes.First(x => type.IsAssignableFrom(x));

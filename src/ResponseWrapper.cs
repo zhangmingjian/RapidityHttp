@@ -13,10 +13,6 @@ namespace Rapidity.Http
         /// </summary>
         public HttpResponse Response { get; set; }
         /// <summary>
-        /// 响应文本数据
-        /// </summary>
-        public string RawResponse { get; set; }
-        /// <summary>
         /// 异常
         /// </summary>
         public Exception Exception { get; set; }
@@ -56,7 +52,6 @@ namespace Rapidity.Http
         public ResponseWrapper(ResponseWrapper wrapper)
         {
             this.Response = wrapper.Response;
-            this.RawResponse = wrapper.RawResponse;
             this.Exception = wrapper.Exception;
             this.HasHitCache = wrapper.HasHitCache;
             this.RetryCount = wrapper.RetryCount;

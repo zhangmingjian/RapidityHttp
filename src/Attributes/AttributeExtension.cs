@@ -15,11 +15,13 @@ namespace Rapidity.Http.Attributes
         /// <returns></returns>
         public static CacheOption GetCacheOption(this CacheAttribute attribute)
         {
-            return new CacheOption
+            var option = new CacheOption
             {
                 Enabled = attribute.Enabled,
-                ExpireIn = attribute.ExpireIn
             };
+            if (attribute.ExpireIn != null)
+                option.ExpireIn = attribute.ExpireIn;
+            return option;
         }
 
         /// <summary>

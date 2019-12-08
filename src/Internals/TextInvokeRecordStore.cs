@@ -12,18 +12,20 @@ namespace Rapidity.Http
     {
         private static object _lock = new object();
 
-        public Task WriteAsync(RequestDescriptor description, ResponseWrapperResult result)
+        public async Task WriteAsync(RequestDescriptor descriptor, ResponseWrapperResult result)
         {
             var sb = new StringBuilder();
             sb.Append(DateTime.Now + ", ");
-            sb.Append($"Url:{GetUriPath(result.Request.RequestUri.ToString())}, ");
+            sb.Append($"Url:{GetUriPath(descriptor, result.Request.RequestUri)}, ");
+            sb.Append($"HasHitCache:{result.HasHitCache},");
             sb.Append($"Duration:{result.Duration}ms, ");
             sb.Append($"RetryCount:{result.RetryCount}, ");
             sb.Append($"StatusCode:{(result.Response != null ? ((int)result.Response.StatusCode).ToString() : string.Empty)}, ");
 
-            var content = result.RawResponse != null && result.RawResponse.Length > 2000
-                ? result.RawResponse?.Substring(0, 2000) + "..."
-                : result.RawResponse;
+            var rawResponse = await result.Response?.Content.ReadAsStringAsync();
+            var content = rawResponse != null && rawResponse.Length > 2000
+                ? rawResponse?.Substring(0, 2000) + "..."
+                : rawResponse;
             sb.Append($"RawResponse:{content}, "); //最多记录2000个字符
 
             if (result.Exception != null)
@@ -33,7 +35,7 @@ namespace Rapidity.Http
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
             if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
 
-            var fileName = Path.Combine(filePath, $"{description.ServiceName}_{DateTime.Today.ToString("yyyyMMdd")}.log");
+            var fileName = Path.Combine(filePath, $"{descriptor.ServiceName}_{DateTime.Today.ToString("yyyyMMdd")}.log");
             var fileInfo = new FileInfo(fileName);
 
             lock (_lock)
@@ -42,17 +44,15 @@ namespace Rapidity.Http
                 {
                     var buffer = Encoding.UTF8.GetBytes(sb.ToString());
                     write.Write(buffer, 0, buffer.Length);
-                    return Task.CompletedTask;
                 }
             }
         }
 
-        private string GetUriPath(string uri)
+        private string GetUriPath(RequestDescriptor descriptor, Uri uri)
         {
-            if (string.IsNullOrEmpty(uri)) return uri;
-            var index = uri.IndexOf('?');
-            if (index <= -1) return uri;
-            return uri.Substring(0, index);
+            if (uri.IsAbsoluteUri) return uri.ToString();
+            var baseUri = descriptor.HttpOption.Uri;
+            return uri.ToString();
         }
     }
 }

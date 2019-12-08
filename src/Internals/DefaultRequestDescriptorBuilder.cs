@@ -30,7 +30,7 @@ namespace Rapidity.Http
             var descriptor = new RequestDescriptor
             {
                 ServiceName = configure.ServiceName,
-                ModuleName = moduleOption.Module ?? method.Name,
+                ModuleName = moduleOption.Module,
                 HttpOption = option
             };
             return Initialize(descriptor, method, arguments);

@@ -23,7 +23,7 @@ namespace Rapidity.Http.Extensions
         }
 
         /// <summary>
-        /// 批量注册 仅用于单个项目对接一个服务时
+        /// 批量注册 用于单个项目对接一个服务时
         /// </summary>
         /// <param name="serviceConfigure"></param>
         /// <param name="assembly"></param>

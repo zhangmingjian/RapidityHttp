@@ -24,42 +24,42 @@ namespace Rapidity.Http
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="description"></param>
+        /// <param name="descriptor"></param>
         /// <returns></returns>
-        public HttpContent GetContent(RequestDescriptor description)
+        public HttpContent GetContent(RequestDescriptor descriptor)
         {
-            if (description.Body == null) return null;
+            if (descriptor.Body == null) return null;
 
             //如果未设置contentType则按stringcontent发送
-            if (string.IsNullOrEmpty(description.HttpOption.ContentType))
+            if (string.IsNullOrEmpty(descriptor.HttpOption.ContentType))
             {
-                var encoding = Encoding.GetEncoding(description.HttpOption.Encoding ?? "utf-8");
-                return new StringContent(description.Body.ToString(), encoding, MimeTypes.Text.Plain);
+                var encoding = Encoding.GetEncoding(descriptor.HttpOption.Encoding ?? "utf-8");
+                return new StringContent(descriptor.Body.ToString(), encoding, MimeTypes.Text.Plain);
             }
 
-            if (description.HttpOption.ContentType.Equals(MimeTypes.Application.Json,
+            if (descriptor.HttpOption.ContentType.Equals(MimeTypes.Application.Json,
                 StringComparison.CurrentCultureIgnoreCase))
             {
-                return JsonContent(description.Body, description.HttpOption.Encoding);
+                return JsonContent(descriptor.Body, descriptor.HttpOption.Encoding);
             }
-            if (description.HttpOption.ContentType.Equals(MimeTypes.Application.Xml,
+            if (descriptor.HttpOption.ContentType.Equals(MimeTypes.Application.Xml,
                 StringComparison.CurrentCultureIgnoreCase))
             {
-                return XmlContent(description.Body, description.HttpOption.Encoding);
+                return XmlContent(descriptor.Body, descriptor.HttpOption.Encoding);
             }
-            if (description.HttpOption.ContentType.Equals(MimeTypes.Application.XWwwFormUrlencoded,
+            if (descriptor.HttpOption.ContentType.Equals(MimeTypes.Application.XWwwFormUrlencoded,
                 StringComparison.CurrentCultureIgnoreCase))
             {
-                return FormUrlContent(description.Body, description.HttpOption.Encoding);
+                return FormUrlContent(descriptor.Body, descriptor.HttpOption.Encoding);
             }
-            if (description.HttpOption.ContentType.Equals(MimeTypes.Application.OctetStream,
+            if (descriptor.HttpOption.ContentType.Equals(MimeTypes.Application.OctetStream,
                 StringComparison.CurrentCultureIgnoreCase))
             {
-                return ByteContent(description.Body);
+                return ByteContent(descriptor.Body);
             }
             //MultipartFormDataContent
 
-            throw new Exception($"不支持的ContentType{description.HttpOption.ContentType}");
+            throw new Exception($"不支持的ContentType{descriptor.HttpOption.ContentType}");
         }
 
         public HttpContent JsonContent(object body, string encode)

@@ -10,7 +10,7 @@ namespace Sample.Service
     /// 
     /// </summary>
     [HttpService(Service = "wechat", ContentType = "application/json", Encoding = "utf-8")]
-    [Cache(true)]
+    [Cache(true, 30)]
     public interface ITokenService : IHttpService
     {
         [Get("/cgi-bin/token")]

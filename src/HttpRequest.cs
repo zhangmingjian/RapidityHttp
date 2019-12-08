@@ -19,12 +19,12 @@ namespace Rapidity.Http
         /// <summary>
         /// 当前请求的hash值，用来标识是否相同内容的请求，作为缓存key
         /// </summary>
-        public string HashCode
+        public string RequestHash
         {
-            get => Properties.ContainsKey(ConstantValue.RequestHashCode)
-                ? (string)Properties[ConstantValue.RequestHashCode]
-                : default;
-            set => Properties[ConstantValue.RequestHashCode] = value;
+            get => Properties.ContainsKey(ConstantValue.RequestHashValue)
+                ? (string)Properties[ConstantValue.RequestHashValue]
+                : Id;
+            set => Properties[ConstantValue.RequestHashValue] = value;
         }
 
         public long TimeStamp
