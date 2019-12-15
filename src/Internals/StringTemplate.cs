@@ -118,6 +118,24 @@ namespace Rapidity.Http
             return temp;
         }
 
+        private string TryReplaceVariable(StringKeyValues values)
+        {
+            string temp = _template;
+            if (values == null || !values.Any())
+                return temp;
+            foreach (var variable in Variables)
+            {
+                var keyValue = values.FirstOrDefault(x => x.Key != null && x.Key.Equals(variable, StringComparison.CurrentCultureIgnoreCase));
+                if (string.IsNullOrWhiteSpace(keyValue.Key)) continue;
+                foreach (var value in keyValue.Value)
+                {
+                    temp = temp.Replace($"{_startMark}{variable}{_endMark}", value);
+                    Trace.TraceInformation($"变量{variable}替换成功，当前值：{temp}");
+                }
+            }
+            return temp;
+        }
+
         /// <summary>
         /// 替换变量,替换变量,对象中找不到变量属性时，跳过该变量的替换
         /// </summary>
@@ -134,12 +152,16 @@ namespace Rapidity.Http
                 return temp;
             }
 
-            if (values is NameValueCollection namValue)
+            if (values is StringKeyValues keyValues)
+                temp = TryReplaceVariable(keyValues);
+            else if (values is NameValueCollection namValue)
                 temp = TryReplaceVariable(namValue);
             else if (values is IEnumerable<KeyValuePair<string, object>> list1)
                 temp = TryReplaceVariable(list1);
             else if (values is IEnumerable<KeyValuePair<string, string>> list2)
                 temp = TryReplaceVariable(list2);
+            else if (values is IEnumerable<KeyValuePair<string, IEnumerable<string>>> list3)
+                temp = TryReplaceVariable(list3);
             else
             {
                 var properties = values.GetType().GetProperties();

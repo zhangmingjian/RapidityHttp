@@ -22,6 +22,10 @@ namespace Sample.Service
         [Post("/cgi-bin/message/template/send?access_token={token}")]
         [Header("action:SendTemplateMsg")]
         ResponseWrapper SendTemplateMsg(string token, [Body(CanNull = false)] MessageTemplate template);
+
+        [Post("/cgi-bin/message/template/send?access_token={token}")]
+        [Header("action:SendTemplateMsgAsync")]
+        Task<ResponseWrapper> SendTemplateMsgAsync(string token, [Body(CanNull = false)] MessageTemplate template);
     }
 
 

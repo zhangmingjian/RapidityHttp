@@ -76,8 +76,8 @@ namespace Rapidity.Http.Extensions
                 //设置默认headers
                 if (config.Option.DefaultHeaders.Count > 0)
                 {
-                    foreach (var key in config.Option.DefaultHeaders.AllKeys)
-                        client.DefaultRequestHeaders.Add(key, config.Option.DefaultHeaders.Get(key));
+                    foreach (var key in config.Option.DefaultHeaders.Keys)
+                        client.DefaultRequestHeaders.Add(key, config.Option.DefaultHeaders[key]);
                 }
                 //设置请求超时时间(默认30秒)
                 client.Timeout = TimeSpan.FromSeconds(config.Timeout > 0 ? config.Timeout : 30);

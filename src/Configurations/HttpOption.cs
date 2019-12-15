@@ -31,7 +31,7 @@ namespace Rapidity.Http.Configurations
         /// <summary>
         /// 请求headers
         /// </summary>
-        public NameValueCollection DefaultHeaders { get; } = new NameValueCollection();
+        public HttpHeaderValues DefaultHeaders { get; } = new HttpHeaderValues();
 
         /// <summary>
         /// 缓存配置

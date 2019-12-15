@@ -64,45 +64,44 @@ namespace Rapidity.Http
                     }
                 }
             }
-            if (descriptor.UriQuery.Count > 0)
-                tempUri = $"{tempUri}{(tempUri.Contains("?") ? "&" : "?")}{descriptor.UriQuery.ToQueryString()}";
-
-            tempUri = Uri.EscapeUriString(tempUri);
-            return new Uri(tempUri, UriKind.RelativeOrAbsolute);
+            return descriptor.UriQuery.Concat(tempUri);
         }
 
         protected virtual void SetHeader(RequestDescriptor descriptor, HttpRequestHeaders header)
         {
             var headers = descriptor.Headers;
-            foreach (var key in headers.AllKeys)
+            foreach (var key in headers.Keys)
             {
-                var value = headers.Get(key);
-                var template = new StringTemplate(value);
-                if (!template.HaveVariable)
+                foreach (var v in headers[key])
                 {
+                    var value = v;
+                    var template = new StringTemplate(value);
+                    if (!template.HaveVariable)
+                    {
+                        header.Add(key, value);
+                        continue;
+                    }
+                    _logger.LogInformation($"{key}:{value}需要进行模板替换");
+                    //尝试使用uri参数进行替换
+                    value = template.TryReplaceVariable(descriptor.UriQuery);
+                    template = new StringTemplate(value);
+                    if (!template.HaveVariable)
+                    {
+                        header.Add(key, value);
+                        continue;
+                    }
+                    //尝试使用ExtendData进行替换
+                    value = template.TryReplaceVariable(descriptor.ExtendData);
+                    template = new StringTemplate(value);
+                    if (!template.HaveVariable)
+                    {
+                        header.Add(key, value);
+                        continue;
+                    }
+                    //尝试使用Body进行替换
+                    value = template.TryReplaceVariable(descriptor.Body, true);
                     header.Add(key, value);
-                    continue;
                 }
-                _logger.LogInformation($"{key}:{value}需要进行模板替换");
-                //尝试使用uri参数进行替换
-                value = template.TryReplaceVariable(descriptor.UriQuery);
-                template = new StringTemplate(value);
-                if (!template.HaveVariable)
-                {
-                    header.Add(key, value);
-                    continue;
-                }
-                //尝试使用ExtendData进行替换
-                value = template.TryReplaceVariable(descriptor.ExtendData);
-                template = new StringTemplate(value);
-                if (!template.HaveVariable)
-                {
-                    header.Add(key, value);
-                    continue;
-                }
-                //尝试使用Body进行替换
-                value = template.TryReplaceVariable(descriptor.Body, true);
-                header.Add(key, value);
             }
         }
 

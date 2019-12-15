@@ -55,6 +55,20 @@ namespace Rapidity.Http.Extensions
             return collection;
         }
 
+        public static StringKeyValues ToStringKeyValues(this object obj, bool ignoreNullValue = true)
+        {
+            var collection = new StringKeyValues();
+            var dic = ToKeyValuePairs(obj, ignoreNullValue);
+            foreach (var item in dic)
+            {
+                if (item.Key != null)
+                {
+                    collection.Add(item.Key, item.Value);
+                }
+            }
+            return collection;
+        }
+
         /// <summary>
         /// 
         /// </summary>

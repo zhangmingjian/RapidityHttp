@@ -24,12 +24,12 @@ namespace Rapidity.Http
         /// <summary>
         /// url查询参数
         /// </summary>
-        public NameValueCollection UriQuery { get; } = new NameValueCollection();
+        public UriQueryValues UriQuery { get; } = new UriQueryValues();
 
         ///// <summary>
         /////  请求headers
         ///// </summary>
-        public NameValueCollection Headers => HttpOption.DefaultHeaders;
+        public HttpHeaderValues Headers => HttpOption.DefaultHeaders;
 
         /// <summary>
         /// 报文体数据

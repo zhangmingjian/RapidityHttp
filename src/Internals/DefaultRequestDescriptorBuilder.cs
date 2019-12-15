@@ -72,7 +72,7 @@ namespace Rapidity.Http
                     }
                     else
                     {
-                        descriptor.UriQuery.Add(parameterValue.ToNameValueCollection());
+                        descriptor.UriQuery.Add(parameterValue.ToStringKeyValues());
                     }
                 }
                 if (headerAttr != null)
@@ -86,7 +86,7 @@ namespace Rapidity.Http
                     }
                     else
                     {
-                        descriptor.Headers.Add(parameterValue.ToNameValueCollection());
+                        descriptor.Headers.Add(parameterValue.ToStringKeyValues());
                     }
                 }
                 if (bodyAttr != null)

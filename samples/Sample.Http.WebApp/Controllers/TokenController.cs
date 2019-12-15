@@ -53,8 +53,7 @@ namespace Sample.Http.WebApp.Controllers
                 url = "https://developers.weixin.qq.com/doc",
                 data = new MessageTemplate.Data()
             };
-            _tokenService.SendTemplateMsg(token.access_token, input);
-            await Task.CompletedTask;
+            var response = await _tokenService.SendTemplateMsgAsync(token.access_token, input);
             return Content("OK");
         }
 
@@ -72,7 +71,7 @@ namespace Sample.Http.WebApp.Controllers
         {
             _cache.TryGetValue("token", out AccessToken token);
             var list = _userService.GetUserList(token.access_token);
-            var info = await _userService.GetUserInfo(token.access_token, list.NextOpenid,"ch");
+            var info = await _userService.GetUserInfo(token.access_token, list.NextOpenid, "ch");
             return Json(info);
         }
 
