@@ -20,11 +20,6 @@ namespace Rapidity.Http.Extensions
     {
         public static IServiceCollection AddRapidityHttp(this IServiceCollection services)
         {
-            services.TryAddTransient<IJsonContentSerializer, NewtonsoftJsonSerializer>();
-            services.TryAddTransient<IXmlContentSerializer, XmlContentSerializer>();
-            services.TryAddTransient(typeof(Lazy<>));
-            services.AddMemoryCache();
-
             services.AddTransient<IHttpClientWrapper, HttpClientWrapper>()
                 .AddTransient<IRequestBuilderFactory, RequestBuilderFactory>()
                 .AddTransient<IResponseResolverFactory, ResponseResolverFactory>()
@@ -36,7 +31,9 @@ namespace Rapidity.Http.Extensions
                 .AddTransient<IRetryPolicyProcessor, DefaultRetryPolicyProcessor>()
                 .AddTransient<ICacheOperator, DefaultCacheOperator>()
                 .AddTransient<IInvokeRecordStore, NullInvokeRecordStore>();
-            services.AddHttpClient();
+
+            services.AddHttpClient()
+                    .AddMemoryCache();
             return services;
         }
 

@@ -10,16 +10,12 @@ namespace Rapidity.Http
     /// <summary>
     /// 
     /// </summary>
-    public class HttpContentGenerator : IHttpContentGenerator
+    internal class HttpContentGenerator : IHttpContentGenerator
     {
-        private readonly Lazy<IJsonContentSerializer> _jsonSerializer;
-        private readonly Lazy<IXmlContentSerializer> _xmlSerializer;
 
-        public HttpContentGenerator(Lazy<IJsonContentSerializer> jsonSerializer, Lazy<IXmlContentSerializer> xmlSerializer)
-        {
-            _jsonSerializer = jsonSerializer;
-            _xmlSerializer = xmlSerializer;
-        }
+        //public HttpContentGenerator()
+        //{
+        //}
 
         /// <summary>
         /// 
@@ -64,7 +60,7 @@ namespace Rapidity.Http
 
         public HttpContent JsonContent(object body, string encode)
         {
-            var serializer = _jsonSerializer.Value;
+            var serializer = new NewtonsoftJsonSerializer();
             var json = serializer.Serialize(body);
             var encoding = Encoding.GetEncoding(encode ?? "utf-8");
             return new StringContent(json, encoding, MimeTypes.Application.Json);
@@ -72,7 +68,7 @@ namespace Rapidity.Http
 
         public HttpContent XmlContent(object body, string encode)
         {
-            var serializer = _xmlSerializer.Value;
+            var serializer = new XmlContentSerializer();
             var json = serializer.Serialize(body);
             var encoding = Encoding.GetEncoding(encode ?? "utf-8");
             return new StringContent(json, encoding, MimeTypes.Application.Xml);

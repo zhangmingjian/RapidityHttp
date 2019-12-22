@@ -7,18 +7,13 @@ namespace Rapidity.Http
     /// <summary>
     /// 
     /// </summary>
-    public class XmlResponseResolver : IHttpResponseResolver
+    internal class XmlResponseResolver : IHttpResponseResolver
     {
-        private readonly IXmlContentSerializer _serializer;
-
-        public XmlResponseResolver(IXmlContentSerializer serializer)
-        {
-            _serializer = serializer;
-        }
 
         public async Task<TData> Resolve<TData>(HttpResponse response, IDictionary<string, object> properties)
         {
             var content = await response.Content.ReadAsStringAsync();
+            var _serializer = new XmlContentSerializer();
             return _serializer.Deserialize<TData>(content);
         }
     }

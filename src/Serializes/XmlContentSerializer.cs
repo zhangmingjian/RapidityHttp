@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 
 namespace Rapidity.Http.Serializes
 {
-    public class XmlContentSerializer : IXmlContentSerializer
+    public class XmlContentSerializer : ContentSerializer
     {
         private readonly XmlSerializeOption _option;
 
@@ -18,7 +18,7 @@ namespace Rapidity.Http.Serializes
             _option = option;
         }
 
-        public virtual string Serialize(object obj)
+        public override string Serialize(object obj)
         {
             var serializer = new XmlSerializer(obj.GetType(), new XmlAttributeOverrides());
             var stream = new MemoryStream();
@@ -36,7 +36,7 @@ namespace Rapidity.Http.Serializes
             }
         }
 
-        public virtual object Deserialize(string xml, Type type)
+        public override object Deserialize(string xml, Type type)
         {
             XmlSerializer xmlSerializer = new XmlSerializer(type, new XmlAttributeOverrides());
             using (var reader = new StringReader(xml))

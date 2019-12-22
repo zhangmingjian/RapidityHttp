@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Rapidity.Http.Serializes
 {
-    public class NewtonsoftJsonSerializer : IJsonContentSerializer
+    public class NewtonsoftJsonSerializer : ContentSerializer
     {
         private readonly NewtonsoftJsonOption _option;
 
@@ -19,14 +19,14 @@ namespace Rapidity.Http.Serializes
             _option = option;
         }
 
-        public string Serialize(object obj)
+        public override string Serialize(object obj)
         {
             return _option?.Settings != null
                 ? JsonConvert.SerializeObject(obj, _option.Settings)
                 : JsonConvert.SerializeObject(obj);
         }
 
-        public object Deserialize(string content, Type type)
+        public override object Deserialize(string content, Type type)
         {
             return _option?.Settings != null
                 ? JsonConvert.DeserializeObject(content, type, _option.Settings)

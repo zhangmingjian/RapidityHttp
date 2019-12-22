@@ -51,7 +51,10 @@ namespace Rapidity.Http
         /// <returns></returns>
         public Uri Concat(string uriString)
         {
-            return Concat(new Uri(uriString, UriKind.RelativeOrAbsolute));
+            if (Count == 0)  return new Uri(uriString, UriKind.RelativeOrAbsolute);
+            var uriStr = uriString.TrimEnd('&').TrimEnd('?');
+            uriStr = $"{uriStr}{(uriStr.Contains('?') ? "&" + ToString() : "?" + ToString())}";
+            return new Uri(uriStr, UriKind.RelativeOrAbsolute);
         }
 
         /// <summary>
@@ -61,10 +64,7 @@ namespace Rapidity.Http
         /// <returns></returns>
         public Uri Concat(Uri uri)
         {
-            if (Count == 0) return uri;
-            var uriStr = uri.ToString().TrimEnd('&').TrimEnd('?');
-            uriStr = $"{uriStr}{(uriStr.Contains('?') ? "&" + ToString() : "?" + ToString())}";
-            return new Uri(uriStr, UriKind.RelativeOrAbsolute);
+            return Concat(uri.ToString());
         }
 
         /// <summary>
