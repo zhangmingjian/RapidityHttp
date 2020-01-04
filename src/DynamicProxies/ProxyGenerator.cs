@@ -344,8 +344,7 @@ namespace Rapidity.Http.DynamicProxies
         private static string RandomName(int length = 16)
         {
             var source = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            var seed = BitConverter.ToInt32(Guid.NewGuid().ToByteArray(), 0);
-            var random = new Random(seed);
+            var random = new Random(Environment.TickCount);
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < length; i++)
             {
@@ -368,7 +367,7 @@ namespace Rapidity.Http.DynamicProxies
         {
             if (level <= 0) return builder;
             for (int i = 0; i < level; i++)
-                builder.Append("\t");
+                builder.Append('\t');
             return builder;
         }
     }
