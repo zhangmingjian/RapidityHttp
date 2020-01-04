@@ -21,14 +21,15 @@ namespace Sample.Http.ConsoleApp
 
                 config.AddModule("GetUserList", httpOption =>
                 {
-                    httpOption.CacheOption = new Rapidity.Http.Configurations.CacheOption {
-                        Enabled = true, 
-                        ExpireIn = TimeSpan.FromSeconds(30), 
+                    httpOption.CacheOption = new Rapidity.Http.Configurations.CacheOption
+                    {
+                        Enabled = true,
+                        ExpireIn = TimeSpan.FromSeconds(30),
                         ExpireType = Rapidity.Http.Configurations.ExpireType.Sliding
                     };
                 });
             }).ForTypes(typeof(ITokenService), typeof(IUserService));
-            services.ConfigDefaultRecordStore().BuildProxy();
+            services.ConfigDefaultRecordStore().BuildProxy(Rapidity.Http.DynamicProxies.CodeGeneratorOption.Default);
 
             return services.BuildServiceProvider();
         }

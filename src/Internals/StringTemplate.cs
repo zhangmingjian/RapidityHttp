@@ -125,7 +125,8 @@ namespace Rapidity.Http
                 return temp;
             foreach (var variable in Variables)
             {
-                var keyValue = values.FirstOrDefault(x => x.Key != null && x.Key.Equals(variable, StringComparison.CurrentCultureIgnoreCase));
+                var keyValue = values.FirstOrDefault(x => x.Key != null 
+                                && x.Key.Equals(variable, StringComparison.CurrentCultureIgnoreCase));
                 if (string.IsNullOrWhiteSpace(keyValue.Key)) continue;
                 foreach (var value in keyValue.Value)
                 {

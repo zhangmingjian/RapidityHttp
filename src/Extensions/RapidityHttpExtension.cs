@@ -120,7 +120,7 @@ namespace Rapidity.Http.Extensions
         /// </summary>
         /// <param name="services"></param>
         /// <returns></returns>
-        public static IServiceCollection BuildProxy(this IServiceCollection services, CodeGeneratorOptions option = null)
+        public static IServiceCollection BuildProxy(this IServiceCollection services, CodeGeneratorOption option = default)
         {
             var configuration = services.ServiceConfigure();
             var types = new Collection<Type>();

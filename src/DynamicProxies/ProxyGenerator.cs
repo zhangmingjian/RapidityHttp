@@ -24,17 +24,18 @@ namespace Rapidity.Http.DynamicProxies
         /// </summary>
         /// <param name="types"></param>
         /// <returns></returns>
-        internal static Assembly Generate(Type[] types, CodeGeneratorOptions option = null)
+        internal static Assembly Generate(Type[] types, CodeGeneratorOption option = default)
         {
             var template = BuildTemplate(types);
             var source = GenerateCode(template);
-            option = option ?? CodeGeneratorOptions.Default;
             if (option.SaveCode)
             {
+                if (string.IsNullOrEmpty(option.BaseDirectory))
+                    option.BaseDirectory = AppDomain.CurrentDomain.BaseDirectory;
                 if (!Directory.Exists(option.BaseDirectory))
                     Directory.CreateDirectory(option.BaseDirectory);
                 var path = Path.Combine(option.BaseDirectory, "GeneratedCode.cs");
-                File.WriteAllText(path, source);
+                File.WriteAllText(path, source, Encoding.UTF8);
             }
             //获取dotnetCore运行环境目录
             var dotnetCoreDirectory = System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory();
@@ -155,7 +156,7 @@ namespace Rapidity.Http.DynamicProxies
         /// <returns></returns>
         internal static string GenerateCode(TemplateMetadata template)
         {
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new StringBuilder(2048);
 
             foreach (var @using in template.UsingList)
                 builder.AppendFormat("using {0};", @using).AppendLine();
@@ -273,8 +274,7 @@ namespace Rapidity.Http.DynamicProxies
                 builder.AppendIndent(indentLevel).Append("}").AppendLine().AppendLine();
                 //--命名空间结束--
             }
-            var code = builder.ToString();
-            return code;
+            return builder.ToString();
         }
 
         /// <summary>
@@ -375,24 +375,23 @@ namespace Rapidity.Http.DynamicProxies
     /// <summary>
     /// 
     /// </summary>
-    public class CodeGeneratorOptions
+    public struct CodeGeneratorOption
     {
         public bool SaveCode { get; set; }
 
         public string BaseDirectory { get; set; }
 
-        public static CodeGeneratorOptions Default
+        public static CodeGeneratorOption Default
         {
             get
             {
-                var option = new CodeGeneratorOptions
+                return new CodeGeneratorOption
                 {
-                    BaseDirectory = AppDomain.CurrentDomain.BaseDirectory
-                };
+                    BaseDirectory = AppDomain.CurrentDomain.BaseDirectory,
 #if DEBUG
-                option.SaveCode = true;
+                    SaveCode = true
 #endif
-                return option;
+                };
             }
         }
     }
