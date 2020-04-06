@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,8 +28,9 @@ namespace MockServer.Rest.Controllers
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody] string value)
+        public JsonResult Post([FromBody] Dictionary<string,string> data)
         {
+            return new JsonResult(data);
         }
 
         // PUT api/values/5
