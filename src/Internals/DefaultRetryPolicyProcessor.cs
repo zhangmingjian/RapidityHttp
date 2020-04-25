@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Rapidity.Http
 {
     /// <summary>
-    /// 重试/熔断降级Processor
+    /// 请求/重试/中断处理器
     /// </summary>
     internal class DefaultRetryPolicyProcessor : IRetryPolicyProcessor
     {
@@ -71,29 +71,45 @@ namespace Rapidity.Http
             return result;
         }
 
+        /// <summary>
+        /// 如果能取到值，则说明当前模块处于熔断状态
+        /// </summary>
+        /// <param name="service"></param>
+        /// <param name="module"></param>
+        /// <returns></returns>
         private ResponseWrapperResult TryGetFuseResult(string service, string module)
         {
             var key = $"{service}.{module}";
 
             if (_cache.TryGetValue<FuseEntry>(key, out FuseEntry entry))
             {
-                if (entry.Result != null)
+                if (entry.Result != null && entry.Result.Fused)
+                {
+                    _logger.LogInformation($"服务{key}当前处于熔断状态");
                     return entry.Result;
+                }
             }
             return null;
         }
 
+        /// <summary>
+        /// 将满足中断条件的响应放入缓存
+        /// </summary>
+        /// <param name="argument"></param>
+        /// <param name="result">响应结果</param>
         public void SetFunseResult(RetryPolicyArgument argument, ResponseWrapperResult result)
         {
-            if (argument.Option == null || !argument.Option.FuseEnabled || argument.IsSuccessResponse(result.Response)) 
+            //未开启中断配置，或成功响应跳过
+            if (argument.Option == null || !argument.Option.FuseEnabled || argument.IsSuccessResponse(result.Response))
                 return;
 
             var key = $"{argument.Service}.{argument.Module}";
             FuseEntry entry = default;
             if (_cache.TryGetValue<FuseEntry>(key, out entry))
             {
-                if (entry.FailedCount >= argument.Option.FuseEnabledWhenFailedCount - 1)
+                if (entry.FailedCount >= argument.Option.FuseEnabledWhenFailedCount)
                 {
+                    _logger.LogWarning($"服务{key}连续失败次数：{entry.FailedCount}已达阈值：{argument.Option.FuseEnabledWhenFailedCount}，触发中断，时间:{argument.Option.FuseDuration}ms");
                     entry.Result = result;
                     entry.Result.Fused = true;
                 }
@@ -137,19 +153,22 @@ namespace Rapidity.Http
              });
 
             if (!CanRetry(option, record, retryCount)) return record;
+            //重试间隔时间
             var waitTime = option.WaitIntervals[retryCount];
+            //等待重试间隔时间
             await Waiting(request, waitTime, option.TotalTimeout, timeoutToken);
             request = request.Clone();
+            //开始重试
             return await SendWithRetryAsync(option, request, sending, records, timeoutToken, ++retryCount);
         }
 
         /// <summary>
-        /// 
+        /// 等待重试间隔时间
         /// </summary>
-        /// <param name="request"></param>
-        /// <param name="waitMilliseconds"></param>
-        /// <param name="totalTimeout"></param>
-        /// <param name="token"></param>
+        /// <param name="request">请求信息</param>
+        /// <param name="waitMilliseconds">等待时间</param>
+        /// <param name="totalTimeout">总超时时间</param>
+        /// <param name="token">外界中断请求或超时时间的信号</param>
         /// <returns></returns>
         private async Task Waiting(HttpRequest request, int waitMilliseconds, int totalTimeout, CancellationToken token)
         {

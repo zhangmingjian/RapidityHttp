@@ -65,11 +65,12 @@ namespace Rapidity.Http
                     }
                 };
                 result = await _retryProcessor.ProcessAsync(argument);
+                //调用日志记录器，写缓存（如果符合条件）
                 _cacheOperator.Write(result.Response, descriptor.HttpOption.CacheOption);
             }
-            //调用日志记录器，写缓存（如果符合条件）
             try
             {
+                //保存请求信息，请求结果
                 await _recordStore.WriteAsync(descriptor, result);
             }
             catch (Exception ex)
@@ -77,8 +78,7 @@ namespace Rapidity.Http
                 _logger.LogError(ex, $"日志记录器{_recordStore.GetType().Name},写入日志时出错：{ex.Message}");
             }
 
-            if (result.Exception != null)
-                throw result.Exception;          
+            if (result.Exception != null)  throw result.Exception;          
             return result;
         }
 

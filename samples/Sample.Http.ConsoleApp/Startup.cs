@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Rapidity.Http;
 using Rapidity.Http.Extensions;
 using Sample.Service;
@@ -30,6 +31,12 @@ namespace Sample.Http.ConsoleApp
                 });
             }).ForTypes(typeof(ITokenService), typeof(IUserService));
             services.ConfigDefaultRecordStore().BuildProxy(Rapidity.Http.DynamicProxies.CodeGeneratorOption.Default);
+
+            services.AddLogging(build =>
+            {
+                build.AddFilter(level => level >= LogLevel.Debug);
+                build.AddConsole();
+            });
 
             return services.BuildServiceProvider();
         }

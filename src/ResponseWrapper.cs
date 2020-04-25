@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace Rapidity.Http
 {
     /// <summary>
-    /// 
+    /// 响应结果完整信息
     /// </summary>
     public class ResponseWrapper
     {
@@ -40,7 +40,7 @@ namespace Rapidity.Http
     }
 
     /// <summary>
-    /// 
+    /// 反序列化后的响应数据
     /// </summary>
     /// <typeparam name="TData"></typeparam>
     public class ResponseWrapper<TData> : ResponseWrapper
@@ -61,12 +61,12 @@ namespace Rapidity.Http
 
 
     /// <summary>
-    /// fulled response data
+    /// 包含重试过程的完整请求数据
     /// </summary>
     public class ResponseWrapperResult : ResponseWrapper
     {
         /// <summary>
-        /// 初始请求
+        /// 原始请求
         /// </summary>
         public HttpRequest Request { get; set; }
 

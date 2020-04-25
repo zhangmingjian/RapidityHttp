@@ -1,4 +1,5 @@
-﻿using Rapidity.Http.Attributes;
+﻿using Microsoft.Extensions.Logging;
+using Rapidity.Http.Attributes;
 using Rapidity.Http.Configurations;
 using Rapidity.Http.Extensions;
 using System;
@@ -9,14 +10,18 @@ namespace Rapidity.Http
     internal class DefaultRequestDescriptorBuilder : IRequestDescriptorBuilder
     {
         private readonly IHttpServiceConfiguration _config;
+        private readonly ILogger<DefaultRequestDescriptorBuilder> _logger;
 
-        public DefaultRequestDescriptorBuilder(IHttpServiceConfiguration config)
+        public DefaultRequestDescriptorBuilder(IHttpServiceConfiguration config, 
+            ILogger<DefaultRequestDescriptorBuilder> logger)
         {
             _config = config;
+            _logger = logger;
         }
 
         public RequestDescriptor Build(MethodInfo method, params object[] arguments)
         {
+            _logger.LogInformation($"开始构建{method.ReflectedType}.{method.Name}方法的RequestDescriptor");
             var methodOption = method.GetConfigureItem();
             var moduleOption = method.ReflectedType.GetConfigureItem(methodOption);
             //从config中获取
@@ -98,6 +103,7 @@ namespace Rapidity.Http
                 if (queryAttr == null && headerAttr == null && bodyAttr == null)
                     descriptor.ExtendData.Add(parameter.Name, parameterValue);
             }
+            _logger.LogInformation($"方法{method.ReflectedType}.{method.Name}的RequestDescriptor构建完毕");
             return descriptor;
         }
     }

@@ -54,11 +54,9 @@ namespace Rapidity.Http.Configurations
         public Type ResponseResolverType { get; set; }
 
         /// <summary>
-        /// 是否为成功响应
+        /// 是否为成功响应,大多数需要定制，许多响应状态码是200，业务失败是通过内容内的状态码体现的
         /// </summary>
-        public Func<HttpResponse, bool> IsSuccessResponse { get; set; } = response => response != null
-                                                                                     && response.StatusCode >= System.Net.HttpStatusCode.OK
-                                                                                     && response.StatusCode < System.Net.HttpStatusCode.Ambiguous;
+        public Func<HttpResponse, bool> IsSuccessResponse { get; set; } = response => response != null && response.IsSuccessStatusCode;
 
         /// <summary>
         /// 两个配置项做交集，根据优先级
